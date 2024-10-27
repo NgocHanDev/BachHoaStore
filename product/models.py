@@ -1,5 +1,5 @@
 from django.db import models
-from category.models import SubCategory
+from category.models import SubCategory, Category
 from unidecode import unidecode
 from django.utils.text import slugify
     
@@ -10,12 +10,13 @@ class Product(models.Model):
     price = models.IntegerField()
     stock = models.IntegerField()
     description = models.TextField(max_length=255, blank=True)
-    images = models.ImageField(upload_to='photos/products')
+    images = models.TextField(blank=True)
     is_available = models.BooleanField(default=True)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
     
     sub_cate = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
+    cate = models.ForeignKey(Category, on_delete=models.CASCADE)
     
         
     def __str__(self):

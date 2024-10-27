@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'category',
     'user',
-    'product'
+    'product',
+    'cart'
 ]
 
 MIDDLEWARE = [
@@ -119,11 +120,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # media file configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
-
+STATICFILES_DIRS = [
+    'BachHoaStore/static'
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
