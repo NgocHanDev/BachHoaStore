@@ -37,3 +37,7 @@ def product(request, category_slug=None, sub_category_slug=None):
     }
     
     return render(request, 'product/product.html', context)
+
+
+def product_detail(request,category_slug=None, sub_category_slug=None, product_slug=None):
+    return render(request, 'product/product_detail.html')
