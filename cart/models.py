@@ -1,5 +1,6 @@
 from django.db import models
 from product.models  import Product
+from product.utils import format_currency
 
 # Create your models here.
 class Cart(models.Model):
@@ -16,4 +17,8 @@ class CartItem(models.Model):
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
-        return self.cart.cart_id+self.product
+        return f"{self.product} ({self.quantity})"
+    def sub_price(self):
+        return format_currency(self.product.price * self.quantity)
+    def price_format(self):
+        return format_currency(self.product.price)

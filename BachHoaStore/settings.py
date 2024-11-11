@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'category.context_processors.get_all_category',
+                'cart.context_processors.counter',
             ],
         },
     },
@@ -127,7 +128,7 @@ STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
 STATICFILES_DIRS = [
-    'BachHoaStore/static'
+    BASE_DIR / 'BachHoaStore/static',
 ]
 
 # Default primary key field type

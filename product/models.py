@@ -1,6 +1,6 @@
 from django.db import models
 from category.models import SubCategory, Category
-from unidecode import unidecode
+from django.urls import reverse
 from django.utils.text import slugify
     
 # Create your models here.
@@ -21,6 +21,8 @@ class Product(models.Model):
         
     def __str__(self):
         return self.product_name
+    def get_url(self):
+        return reverse('product_detail', args=[self.cate.slug, self.sub_cate.slug, self.slug])
     
 class Attribute(models.Model):
     key = models.CharField(max_length=100, default=None)

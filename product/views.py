@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from .models import Product
 from .utils import format_currency
 from category.models import Category, SubCategory
+from cart.models import Cart, CartItem
+from cart.views import _generate_cart_id as _cart_id
 
 # Create your views here.
 def product(request, category_slug=None, sub_category_slug=None):
-    
     categories = None
     sub_categories = None
     products = None
@@ -25,8 +26,17 @@ def product(request, category_slug=None, sub_category_slug=None):
     list_all_category = Category.objects.all()
     list_all_sub_category = SubCategory.objects.all()   
     for product in products:
+        product.in_cart = False
         product.price_sale = format_currency(product.price + product.price * 0.15)
         product.price = format_currency(product.price)
+        try:
+            # cart = get_object_or_404(Cart, cart_id = _cart_id(request))
+            cart = Cart.objects.get(cart_id = _cart_id(request))
+            cart_item = CartItem.objects.filter(cart = cart, product = product)
+            if cart_item.exists():
+                product.in_cart = True
+        except Cart.DoesNotExist:
+            pass
     
     context = {
         'products': products,
@@ -40,4 +50,21 @@ def product(request, category_slug=None, sub_category_slug=None):
 
 
 def product_detail(request,category_slug=None, sub_category_slug=None, product_slug=None):
-    return render(request, 'product/product_detail.html')
+    in_cart = False
+    try:
+        single_product = Product.objects.get(cate__slug = category_slug, sub_cate__slug = sub_category_slug, slug = product_slug)
+        # check if product is in cart
+        # cart = get_object_or_404(Cart, cart_id = _cart_id(request))
+        cart = Cart.objects.get(cart_id = _cart_id(request))
+        cart_item = CartItem.objects.filter(cart = cart, product = single_product)
+        if cart_item.exists():
+            in_cart = True
+    except Exception as e:
+        pass
+    single_product.price = format_currency(single_product.price)
+    context = {
+        'single_product': single_product,
+        'in_cart': in_cart
+    }
+    
+    return render(request, 'product/product_detail.html', context=  context)

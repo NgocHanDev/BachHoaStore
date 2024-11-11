@@ -1,7 +1,5 @@
-
 {% extends "base.html" %}
 {%load static%}
-
 
 {% block content %}
 
@@ -10,7 +8,7 @@
 <div class="container">
 
 <div class="intro-banner-wrap">
-	<img src={% static "images/banners/1.jpg" %} class="img-fluid rounded">
+	<img src="https://i.postimg.cc/Bn4HDV8K/banner.jpg" class="img-fluid rounded"/>
 </div>
 
 </div> <!-- container //  -->
@@ -31,10 +29,19 @@
 	{% for product in products %}
 	<div class="col-md-3">
 		<div class="card card-product-grid">
-			<a href="{{product.slug}}" class="img-wrap"> <img src="{{product.images}}"> </a>
+			<a href="{{product.get_url}}" class="img-wrap"> <img src="{{product.images}}"> </a>
 			<figcaption class="info-wrap">
-				<a href="{{product.slug}}" class="title">{{product.product_name}}</a>
-				<div class="price mt-1">{{product.price}}</div> <!-- price-wrap.// -->
+				<a href="{{product.get_url}}" class="title text-truncate">{{product.product_name}}</a>
+				<div class="price mt-1">{{product.price}} 
+					<del class="price-old">{{product.price_sale}}</del>
+				</div> <!-- price-wrap.// -->
+				<div class="text-center mt-2"> 
+					{% if product.in_cart %}
+					<a href="#" class="btn btn-success disabled">Đã trong giỏ hàng</a>
+					{%else%}
+					<a href="{% url 'add_cart' product.id %}" class="btn btn-primary">Thêm vào giỏ hàng</a>
+					{% endif %}
+				</div> <!-- action-wrap.// -->
 			</figcaption>
 		</div>
 	</div> <!-- col.// -->
