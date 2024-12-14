@@ -20,6 +20,7 @@ from . import views
 from django.conf.urls.static import static
 from django.conf import settings
 from django.urls import include
+from .views import home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,4 +28,5 @@ urlpatterns = [
     path('sanpham/', include('product.urls')),
     path('cart/', include('cart.urls')),
     path('users/', include('user.urls')),
+    path('', home, name='home'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
