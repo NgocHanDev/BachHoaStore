@@ -10,12 +10,19 @@ class MyUserManager(BaseUserManager):
         if not email:
             raise ValueError('Vui lòng nhập email!')
         
+        if self.model.objects.filter(phone_number=phone_number).exists():
+            raise ValueError('Số điện thoại đã được đăng ký!')
+
+        if self.model.objects.filter(email=email).exists():
+            raise ValueError('Email đã được đăng ký!')
+        
         user = self.model(
             phone_number = phone_number,
             email = self.normalize_email(email),
             full_name = full_name,
         )
         user.set_password(password)
+        user.is_active = True
         user.save(using=self._db)
         return user
     
@@ -27,7 +34,6 @@ class MyUserManager(BaseUserManager):
             password=password,
         )
         user.is_admin = True
-        user.is_active = True
         user.is_staff = True
         user.is_superadmin = True
         user.save(using=self._db)
