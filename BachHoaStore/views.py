@@ -36,3 +36,20 @@ def home(request):
     }
     
     return render(request, 'home.html', context)
+def format_currency(value):
+    return "{:,.0f}".format(value)
+
+def home_search(request):
+    query = request.GET.get('q')
+    products = Product.objects.filter(product_name__icontains=query, is_available=True)
+    
+    for product in products:
+        product.price_sale = format_currency(product.price + product.price * 0.15)
+        product.price = format_currency(product.price)
+    
+    context = {
+        'products': products,
+        'query': query,
+    }
+    
+    return render(request, 'search-result.html', context)
