@@ -29,4 +29,5 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('users/', include('user.urls')),
     path('', home, name='home'),
+        path('search/', views.home_search, name='home_search'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
