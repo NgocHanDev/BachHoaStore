@@ -4,48 +4,58 @@ from .utils import format_currency
 from category.models import Category, SubCategory
 from cart.models import Cart, CartItem
 from cart.views import _generate_cart_id as _cart_id
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
-# Create your views here.
 def product(request, category_slug=None, sub_category_slug=None):
     categories = None
     sub_categories = None
     products = None
-    
-    if category_slug != None:
-        if sub_category_slug !=None:
-            categories = get_object_or_404(Category,slug = category_slug)
-            sub_categories = get_object_or_404(SubCategory,slug = sub_category_slug)
-            products = Product.objects.all().filter(cate = categories, is_available = True, sub_cate = sub_categories)
+
+    if category_slug is not None:
+        if sub_category_slug is not None:
+            categories = get_object_or_404(Category, slug=category_slug)
+            sub_categories = get_object_or_404(SubCategory, slug=sub_category_slug)
+            products = Product.objects.filter(cate=categories, sub_cate=sub_categories, is_available=True)
         else:
-            categories = get_object_or_404(Category,slug = category_slug)
-            products = Product.objects.all().filter(cate = categories, is_available = True)
+            categories = get_object_or_404(Category, slug=category_slug)
+            products = Product.objects.filter(cate=categories, is_available=True)
     else:
-        products = Product.objects.all().filter(is_available = True)
-    
-    
+        products = Product.objects.filter(is_available=True)
+
     list_all_category = Category.objects.all()
-    list_all_sub_category = SubCategory.objects.all()   
+    list_all_sub_category = SubCategory.objects.all()
+
+    # Phân trang
+    page = request.GET.get('page', 1)
+    paginator = Paginator(products, 6)  # Hiển thị 6 sản phẩm mỗi trang
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+
+    # Định dạng giá và kiểm tra giỏ hàng
     for product in products:
         product.in_cart = False
         product.price_sale = format_currency(product.price + product.price * 0.15)
         product.price = format_currency(product.price)
         try:
-            # cart = get_object_or_404(Cart, cart_id = _cart_id(request))
-            cart = Cart.objects.get(cart_id = _cart_id(request))
-            cart_item = CartItem.objects.filter(cart = cart, product = product)
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_item = CartItem.objects.filter(cart=cart, product=product)
             if cart_item.exists():
                 product.in_cart = True
         except Cart.DoesNotExist:
             pass
-    
+
     context = {
         'products': products,
         'categories': list_all_category,
         'sub_categories': list_all_sub_category,
         'current_category': category_slug,
-        'current_sub_category': sub_category_slug
+        'current_sub_category': sub_category_slug,
     }
-    
+
     return render(request, 'product/product.html', context)
 
 
