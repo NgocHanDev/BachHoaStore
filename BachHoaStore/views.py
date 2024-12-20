@@ -53,3 +53,5 @@ def home_search(request):
     }
     
     return render(request, 'search-result.html', context)
+def place_order(request):
+    return render(request, 'place-order.html')
