@@ -1,18 +1,4 @@
 {% extends "base.html" %} {%load static%} {% block content %}
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="pragma" content="no-cache" />
-    <meta http-equiv="cache-control" content="max-age=604800" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-
-    <title>GreatKart | One of the Biggest Online Shopping Platform</title>
-
     <link href="images/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
     <!-- jQuery -->
@@ -51,6 +37,7 @@
     </script>
   </head>
   <body>
+    <!-- ========================= SECTION CONTENT ========================= -->
     <!-- section-header.// -->
     <section class="section-content padding-y bg">
       <div class="container">
@@ -61,59 +48,28 @@
               <div class="card-body">
                 <h4 class="card-title mb-4">Review cart</h4>
                 <div class="row">
+                  {% for item in cart_items %}
                   <div class="col-md-6">
                     <figure class="itemside mb-4">
                       <div class="aside">
-                        <img src="./images/items/1.jpg" class="border img-sm" />
+                        <img
+                          src="{{ item.product.images }}"
+                          class="border img-sm"
+                        />
                       </div>
                       <figcaption class="info">
-                        <p>Apple iPad (2019) 32Gb Wi-Fi gold</p>
-                        <span class="text-muted">2x = $560 </span>
+                        <p>{{ item.product.product_name }}</p>
+                        <span class="text-muted"
+                          >{{ item.quantity }}x = {{item.sub_price}}</span
+                        >
                       </figcaption>
                     </figure>
                   </div>
-                  <!-- col.// -->
-                  <div class="col-md-6">
-                    <figure class="itemside mb-4">
-                      <div class="aside">
-                        <img src="./images/items/2.jpg" class="border img-sm" />
-                      </div>
-                      <figcaption class="info">
-                        <p>Apple iPad (2019) 32Gb Wi-Fi gold</p>
-                        <span class="text-muted">2x = $560 </span>
-                      </figcaption>
-                    </figure>
-                  </div>
-                  <!-- col.// -->
-                  <div class="col-md-6">
-                    <figure class="itemside mb-4">
-                      <div class="aside">
-                        <img src="./images/items/3.jpg" class="border img-sm" />
-                      </div>
-                      <figcaption class="info">
-                        <p>Apple iPad (2019) 32Gb Wi-Fi gold</p>
-                        <span class="text-muted">2x = $560 </span>
-                      </figcaption>
-                    </figure>
-                  </div>
-                  <!-- col.// -->
-                  <div class="col-md-6">
-                    <figure class="itemside mb-4">
-                      <div class="aside">
-                        <img src="./images/items/4.jpg" class="border img-sm" />
-                      </div>
-                      <figcaption class="info">
-                        <p>Apple iPad (2019) 32Gb Wi-Fi gold</p>
-                        <span class="text-muted">2x = $560 </span>
-                      </figcaption>
-                    </figure>
-                  </div>
-                  <!-- col.// -->
+                  {% endfor %}
                 </div>
-                <!-- row.// -->
               </div>
-              <!-- card-body.// -->
             </article>
+            <!-- existing articles -->
             <!-- card.// -->
 
             <article class="card mb-4">
@@ -330,29 +286,32 @@
               <div class="card-body">
                 <dl class="dlist-align">
                   <dt>Total price:</dt>
-                  <dd class="text-right">$69.97</dd>
+                  <dd class="text-right">{{ total }}</dd>
                 </dl>
                 <dl class="dlist-align">
                   <dt>Tax:</dt>
-                  <dd class="text-right">$10.00</dd>
+                  <dd class="text-right">{{ tax }}</dd>
                 </dl>
                 <dl class="dlist-align">
                   <dt>Total:</dt>
                   <dd class="text-right text-dark b">
-                    <strong>$59.97</strong>
+                    <strong>{{ grand_total }}</strong>
                   </dd>
                 </dl>
                 <hr />
                 <p class="text-center mb-3">
-                  <img src="./images/misc/payments.png" height="26" />
+                  <img
+                    src="{% static 'images/misc/payments.png' %}"
+                    height="26"
+                  />
                 </p>
-                <a href="./place-order.html" class="btn btn-primary btn-block">
-                  Place Order
-                </a>
+                <a
+                  href="{% url 'place_order' %}"
+                  class="btn btn-primary btn-block"
+                  >Place Order</a
+                >
               </div>
-              <!-- card-body.// -->
             </div>
-            <!-- card.// -->
           </aside>
           <!-- col.// -->
         </div>
