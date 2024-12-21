@@ -54,3 +54,6 @@ def logout(request):
     auth.logout(request)
     messages.success(request, 'Đăng xuất thành công!')
     return render(request, 'user/login.html')
+
+def forgot_password(request):
+    return render(request, 'user/forgot-password.html')
