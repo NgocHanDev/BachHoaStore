@@ -30,4 +30,5 @@ urlpatterns = [
     path('users/', include('user.urls')),
     path('', home, name='home'),
         path('search/', views.home_search, name='home_search'),
+        path('place_order/', views.place_order, name='place_order'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

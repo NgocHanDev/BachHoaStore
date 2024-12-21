@@ -36,8 +36,9 @@ def home(request):
     }
     
     return render(request, 'home.html', context)
-def format_currency(value):
-    return "{:,.0f}".format(value)
+def format_currency(amount):
+    formatted_amount = f"{amount:,.0f}đ"
+    return formatted_amount.replace(",", ".")
 
 def home_search(request):
     query = request.GET.get('q')
@@ -53,3 +54,22 @@ def home_search(request):
     }
     
     return render(request, 'search-result.html', context)
+
+def place_order(request):
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+    except Cart.DoesNotExist:
+        cart_items = []
+
+    total = sum(item.product.price * item.quantity for item in cart_items)
+    tax = total * 0.02  # Giả sử thuế là 2%
+    grand_total = total + tax
+
+    context = {
+        'cart_items': cart_items,
+        'total': format_currency(total),
+        'tax': format_currency(tax),
+        'grand_total': format_currency(grand_total),
+    }
+    return render(request, 'place-order.html', context)
