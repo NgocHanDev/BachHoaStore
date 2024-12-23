@@ -1,0 +1,16 @@
+<!-- filepath: /d:/pyweb/BachHoaStore/templates/product/edit_review.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="section-content padding-y bg">
+  <div class="container">
+    <h3 class="mt-5">Chỉnh sửa đánh giá</h3>
+    <form action="{% url 'edit_review' review.id %}" method="POST" enctype="multipart/form-data" class="p-4 bg-light rounded">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Cập nhật đánh giá</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

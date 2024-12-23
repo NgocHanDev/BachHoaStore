@@ -61,5 +61,18 @@ class ReviewRating(models.Model):
         if user in self.likes.all():
             self.likes.remove(user)
 
+
     def __str__(self):
-        return self.subject
+        return f"product: {self.product.product_name}, user: {self.user.username}, rating: {self.rating}"
+
+class Reply(models.Model):
+    review = models.ForeignKey(ReviewRating, related_name='replies', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    reply = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(User, related_name='reply_likes', blank=True)
+    dislikes = models.ManyToManyField(User, related_name='reply_dislikes', blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.review.review[:20]}"
