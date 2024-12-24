@@ -5,6 +5,8 @@ from cart.models import Cart, CartItem
 from cart.views import _generate_cart_id as _cart_id
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from decimal import Decimal
 
 def home(request):
     products_list = Product.objects.all().filter(is_available=True)
@@ -21,7 +23,7 @@ def home(request):
         products = paginator.page(paginator.num_pages)
 
     for product in products:
-        product.price_sale = format_currency(product.price + product.price * 0.15)
+        product.price_sale = format_currency(product.price + product.price * Decimal(0.15))
         product.price = format_currency(product.price)
         product.in_cart = False
         try:
@@ -34,6 +36,7 @@ def home(request):
 
     context = {
         'products': products,
+
     }
     
     return render(request, 'home.html', context)
@@ -46,7 +49,7 @@ def home_search(request):
     products = Product.objects.filter(product_name__icontains=query, is_available=True)
     
     for product in products:
-        product.price_sale = format_currency(product.price + product.price * 0.15)
+        product.price_sale = format_currency(product.price + product.price * Decimal(0.15))
         product.price = format_currency(product.price)
     
     context = {
@@ -64,7 +67,7 @@ def place_order(request):
         cart_items = []
 
     total = sum(item.product.price * item.quantity for item in cart_items)
-    tax = total * 0.02  # Giả sử thuế là 2%
+    tax = total * Decimal(0.02)  # Giả sử thuế là 2%
     grand_total = total + tax
 
     context = {

@@ -1,8 +1,10 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render 
 from product.models import Product
 from .models import Cart, CartItem
 from django.shortcuts import redirect
 from product.utils import format_currency
+from decimal import Decimal
+
 # Create your views here.
 
 def _generate_cart_id(request):
@@ -12,8 +14,8 @@ def _generate_cart_id(request):
     return cart_id
 
 def cart(request, total = 0, quantity = 0, cart_items = None):
-    tax = {"percent": 0.02, "total": 0}
-    root_price = 0
+    tax = {"percent": Decimal('0.02'), "total": Decimal('0')}
+    root_price = Decimal('0')
     try: 
         cart = Cart.objects.get(cart_id = _generate_cart_id(request))
         cart_items = CartItem.objects.filter(cart = cart, is_active = True)

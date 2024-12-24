@@ -61,10 +61,9 @@
             </button>
             <div class="dropdown-menu">
               {% for cate in links %}
-              <a class="dropdown-item" href="{{cate.get_url}}"
-                >{{cate.category_name}}</a
-              >
+              <a class="dropdown-item" href="{{cate.get_url}}">{{cate.category_name}}</a>
               {% endfor %}
+              <a class="dropdown-item" href="{% url 'promotions' %}">Khuyến Mãi Sốc</a>
             </div>
           </div>
           <!-- category-wrap.// -->

@@ -13,6 +13,7 @@ import sqlite3
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from decimal import Decimal
 
 def product(request, category_slug=None, sub_category_slug=None):
     categories = None
@@ -46,7 +47,7 @@ def product(request, category_slug=None, sub_category_slug=None):
     # Định dạng giá và kiểm tra giỏ hàng
     for product in products:
         product.in_cart = False
-        product.price_sale = format_currency(product.price + product.price * 0.15)
+        product.price_sale = format_currency(product.price + product.price * Decimal(0.15))
         product.price = format_currency(product.price)
         try:
             cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -131,7 +132,7 @@ def product_detail(request, category_slug=None, sub_category_slug=None, product_
         recommended_products = [Product.objects.get(id=df.iloc[i[0]]['id']) for i in similar_products]
     for product in recommended_products:
         product.in_cart = False
-        product.price_sale = format_currency(product.price + product.price * 0.15)
+        product.price_sale = format_currency(product.price + product.price * Decimal(0.15))
         product.price = format_currency(product.price)
         try:
             cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -233,7 +234,7 @@ def edit_reply(request, reply_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Phản hồi của bạn đã được cập nhật.')
-            return redirect('product_detail', category_slug=reply.review.product.cate.slug, sub_category_slug=reply.review.product.sub_cate.slug, product_slug=reply.review.product.slug)
+            return redirect('product_detail.html', category_slug=reply.review.product.cate.slug, sub_category_slug=reply.review.product.sub_cate.slug, product_slug=reply.review.product.slug)
     else:
         form = ReplyForm(instance=reply)
     return render(request, 'product/edit_reply.html', {'form': form})
