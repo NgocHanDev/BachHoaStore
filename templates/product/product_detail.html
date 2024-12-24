@@ -71,8 +71,8 @@
       <label for="rating">Chọn mức sao:</label>
       <div class="rating mb-3">
         {% for star in "12345" %}
-        <input type="radio" name="rating" id="star{{ star }}" value="{{ star }}" required />
-        <label for="star{{ star }}" class="star">&#9733;</label>
+          <input type="radio" name="rating" id="star{{ star }}" value="{{ star }}" required />
+          <label for="star{{ star }}" class="star">&#9733;</label>
         {% endfor %}
       </div>
       
@@ -186,31 +186,34 @@
     flex-direction: row;
     justify-content: flex-start;
   }
-
+  
   .star {
     font-size: 2rem;
     color: #ddd;
     cursor: pointer;
     margin: 0 0.1rem;
   }
-
+  
   .star:hover,
   .star:hover ~ .star {
     color: #ffc107;
   }
-
-  input[type="radio"]:checked ~ .star {
+  
+  input[type="radio"] + label {
     color: #ddd;
   }
-
-  input[type="radio"]:checked + label,
+  
+  input[type="radio"]:checked + label {
+    color: #ffc107;
+  }
+  
   input[type="radio"]:checked + label ~ label {
     color: #ffc107;
   }
-
+  
   input[type="radio"] {
     display: none;
-  }
+  }  
 
   .review-item {
     background-color: #f8f9fa;

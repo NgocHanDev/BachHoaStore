@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.db.models import Avg, Count
 from .forms import ReviewForm, ReplyForm
 from django.http import JsonResponse
+
 def product(request, category_slug=None, sub_category_slug=None):
     categories = None
     sub_categories = None
@@ -131,7 +132,7 @@ def edit_review(request, review_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Đánh giá của bạn đã được cập nhật.')
-            return redirect('product_detail', category_slug=review.product.cate.slug, sub_category_slug=review.product.sub_cate.slug, product_slug=review.product.slug)
+            return redirect('product_detail.html', category_slug=review.product.cate.slug, sub_category_slug=review.product.sub_cate.slug, product_slug=review.product.slug)
     else:
         form = ReviewForm(instance=review)
     return render(request, 'product/edit_review.html', {'form': form, 'review': review})
