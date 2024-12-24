@@ -9,6 +9,10 @@ from django.contrib import messages
 from django.db.models import Avg, Count
 from .forms import ReviewForm, ReplyForm
 from django.http import JsonResponse
+import sqlite3
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 def product(request, category_slug=None, sub_category_slug=None):
     categories = None
@@ -68,7 +72,7 @@ def product_detail(request, category_slug=None, sub_category_slug=None, product_
     reviews = []
     average_rating = 0
     review_count = 0
-
+    recommended_products = []
     try:
         single_product = Product.objects.get(
             cate__slug=category_slug, sub_cate__slug=sub_category_slug, slug=product_slug
@@ -89,10 +93,57 @@ def product_detail(request, category_slug=None, sub_category_slug=None, product_
         pass
 
     single_product.price = format_currency(single_product.price)
+    database = 'db.sqlite3'
+    try:
+        conn = sqlite3.connect(database)
+        query = "SELECT product_product.slug,product_product.id, product_product.product_name, category_name, sub_category_name FROM product_product JOIN category_category ON product_product.cate_id = category_category.id JOIN category_subcategory ON product_product.sub_cate_id = category_subcategory.id"
+        df = pd.read_sql(query, conn)
+    except Exception as e:
+        print(e)
+        df = pd.DataFrame()  # Empty DataFrame in case of error
+    finally:
+        if conn:
+            conn.close()
 
+    if not df.empty:
+        features = ['product_name','category_name', 'sub_category_name']
+
+        def combined_features(row):
+            return str(row['product_name']) + 'category_' + str(row['category_name']) + ' subcategory_' + str(row['sub_category_name'])
+
+        df['combined_features'] = df.apply(combined_features, axis=1)
+
+        tf = TfidfVectorizer()
+        tfMatrix = tf.fit_transform(df['combined_features'])
+        similar = cosine_similarity(tfMatrix)
+
+        # Find the index of the selected product
+        selected_product_index = df[df['slug'] == product_slug].index[0]
+
+        # Get similarity scores for the selected product
+        similar_products = list(enumerate(similar[selected_product_index]))
+        # Sort the products based on similarity scores
+        similar_products = sorted(similar_products, key=lambda x: x[1], reverse=True)
+        # Exclude the selected product itself and get top 5 recommendations
+        similar_products = similar_products[1:7]
+
+        # Get the recommended products
+        recommended_products = [Product.objects.get(id=df.iloc[i[0]]['id']) for i in similar_products]
+    for product in recommended_products:
+        product.in_cart = False
+        product.price_sale = format_currency(product.price + product.price * 0.15)
+        product.price = format_currency(product.price)
+        try:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_item = CartItem.objects.filter(cart=cart, product=product)
+            if cart_item.exists():
+                product.in_cart = True
+        except Cart.DoesNotExist:
+            pass
     context = {
         'single_product': single_product,
         'in_cart': in_cart,
+        'recommended_products': recommended_products,
         'reviews': reviews,
         'average_rating': average_rating,
         'review_count': review_count,

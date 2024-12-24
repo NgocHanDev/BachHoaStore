@@ -46,7 +46,7 @@
           <main class="col-md-8">
             <article class="card mb-4">
               <div class="card-body">
-                <h4 class="card-title mb-4">Review cart</h4>
+                <h4 class="card-title mb-4">Giỏ hàng</h4>
                 <div class="row">
                   {% for item in cart_items %}
                   <div class="col-md-6">
@@ -74,27 +74,19 @@
 
             <article class="card mb-4">
               <div class="card-body">
-                <h4 class="card-title mb-4">Contact info</h4>
+                <h4 class="card-title mb-4">Thông tin liên lạc</h4>
                 <form action="">
                   <div class="row">
                     <div class="form-group col-sm-6">
-                      <label>Frst name</label>
+                      <label>Họ Tên</label>
                       <input
                         type="text"
-                        placeholder="Type here"
+                        placeholder="Họ tên.."
                         class="form-control"
                       />
                     </div>
                     <div class="form-group col-sm-6">
-                      <label>Last name</label>
-                      <input
-                        type="text"
-                        placeholder="Type here"
-                        class="form-control"
-                      />
-                    </div>
-                    <div class="form-group col-sm-6">
-                      <label>Phone</label>
+                      <label>Số điện thoại</label>
                       <input type="text" value="+998" class="form-control" />
                     </div>
                     <div class="form-group col-sm-6">
@@ -115,53 +107,30 @@
 
             <article class="card mb-4">
               <div class="card-body">
-                <h4 class="card-title mb-4">Delivery info</h4>
+                <h4 class="card-title mb-4">Thông tin địa chỉ</h4>
+                <h6 class="card-title mb-4">Chỉ giao hàng ở TPHCM</h6>
                 <form action="">
                   <div class="row">
                     <div class="form-group col-sm-6">
-                      <label>Country*</label>
-                      <select name="" class="form-control">
-                        <option value="">India</option>
-                        <option value="">United States</option>
-                        <option value="">France</option>
-                        <option value="">Italy</option>
+                      <label>Quận/Huyện</label>
+                      <select id="dicstrict" name="dicstrict" class="form-control">
+                        <option value="" disabled selected>Chọn Quận/Huyện</option>
                       </select>
                     </div>
                     <div class="form-group col-sm-6">
-                      <label>State*</label>
-                      <input
-                        type="text"
-                        placeholder="Type here"
-                        class="form-control"
-                      />
+                      <label>Phường/Xã</label>
+                      <select id="ward" name="ward" class="form-control">
+                        <option value="" disabled selected>Chọn Phường/Xã</option>
+                       
+                      </select>
                     </div>
                     <div class="form-group col-sm-8">
-                      <label>Street*</label>
+                      <label>Số Nhà, Tên Đường</label>
                       <input
                         type="text"
                         placeholder="Type here"
                         class="form-control"
                       />
-                    </div>
-                    <div class="form-group col-sm-4">
-                      <label>Building</label>
-                      <input type="text" placeholder="" class="form-control" />
-                    </div>
-                    <div class="form-group col-sm-4">
-                      <label>House</label>
-                      <input
-                        type="text"
-                        placeholder="Type here"
-                        class="form-control"
-                      />
-                    </div>
-                    <div class="form-group col-sm-4">
-                      <label>Postal code</label>
-                      <input type="text" placeholder="" class="form-control" />
-                    </div>
-                    <div class="form-group col-sm-4">
-                      <label>Zip</label>
-                      <input type="text" placeholder="" class="form-control" />
                     </div>
                   </div>
                   <!-- row.// -->
@@ -175,7 +144,7 @@
               <div class="card">
                 <header class="card-header">
                   <img
-                    src="./images/misc/payment-paypal.png"
+                    src="../static/images/misc/payment-paypal.png"
                     class="float-right"
                     height="24"
                   />
@@ -201,13 +170,13 @@
                 >
                   <div class="card-body">
                     <p class="text-center text-muted">
-                      Connect your PayPal account and use it to pay your bills.
-                      You'll be redirected to PayPal to add your billing
-                      information.
+                      Kết nối tài khoản PayPal của bạn và sử dụng để thanh toán hóa đơn.
+Bạn sẽ được chuyển hướng đến PayPal để thêm thông tin thanh toán
+của mình.
                     </p>
                     <p class="text-center">
                       <a href="#"
-                        ><img src="./images/misc/btn-paypal.png" height="32"
+                        ><img src="../static/images/misc/btn-paypal.png" height="32"
                       /></a>
                       <br /><br />
                     </p>
@@ -220,7 +189,7 @@
               <div class="card">
                 <header class="card-header">
                   <img
-                    src="./images/misc/payment-card.png"
+                    src="../static/images/misc/payment-card.png"
                     class="float-right"
                     height="24"
                   />
@@ -235,7 +204,7 @@
                       type="radio"
                       value="option2"
                     />
-                    <h6 class="form-check-label">Credit Card</h6>
+                    <h6 class="form-check-label">Thẻ Tín Dụng</h6>
                   </label>
                 </header>
                 <div
@@ -245,7 +214,7 @@
                 >
                   <div class="card-body">
                     <p class="alert alert-success">
-                      Some information or instruction
+                     Một số thông tin về thẻ tín dụng của bạn
                     </p>
                     <form class="form-inline">
                       <input
@@ -285,15 +254,15 @@
             <div class="card">
               <div class="card-body">
                 <dl class="dlist-align">
-                  <dt>Total price:</dt>
+                  <dt>Giá tạm tính:</dt>
                   <dd class="text-right">{{ total }}</dd>
                 </dl>
                 <dl class="dlist-align">
-                  <dt>Tax:</dt>
+                  <dt>Thuế:</dt>
                   <dd class="text-right">{{ tax }}</dd>
                 </dl>
                 <dl class="dlist-align">
-                  <dt>Total:</dt>
+                  <dt>Tổng tiền:</dt>
                   <dd class="text-right text-dark b">
                     <strong>{{ grand_total }}</strong>
                   </dd>
@@ -306,9 +275,9 @@
                   />
                 </p>
                 <a
-                  href="{% url 'place_order' %}"
+                  href="{% url 'order_complete' %}"
                   class="btn btn-primary btn-block"
-                  >Place Order</a
+                  >Thanh toán</a
                 >
               </div>
             </div>
@@ -324,6 +293,47 @@
     <!-- ========================= SECTION CONTENT END// ========================= -->
 
     <!-- ========================= SECTION CONTENT END// ========================= -->
+    <script>
+      window.onload = () => {
+        const dicstrict = document.getElementById("dicstrict");
+        const ward = document.getElementById("ward");
+        const dicstrict_url = "https://provinces.open-api.vn/api/p/79?depth=2";
+        const ward_url = "https://provinces.open-api.vn/api/d";
+        fetch(dicstrict_url)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            
+            data.districts.forEach((district) => {
+              const option = document.createElement("option");
+              option.value = district.code;
+              option.text = district.name;
+              dicstrict.appendChild(option);
+            });
+          });
+        dicstrict.addEventListener("change", (e) => {
+          const code = e.target.value;
+          fetch(`${ward_url}/${code}?depth=2`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              
+              ward.innerHTML = '<option value="" disabled selected>Chọn Phường/Xã</option>';
+              data.wards.forEach((wardData) => {
+                const option = document.createElement("option");
+                option.value = wardData.code;
+                option.text = wardData.name;
+                ward.appendChild(option);
+              });
+            });
+        });
+      };
+      
+    </script>
     {% endblock %}
+    <script src="{% static 'js/jquery-2.0.0.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+    
   </body>
 </html>

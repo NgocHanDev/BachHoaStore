@@ -4,6 +4,7 @@ from product.utils import format_currency
 from cart.models import Cart, CartItem
 from cart.views import _generate_cart_id as _cart_id
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     products_list = Product.objects.all().filter(is_available=True)
@@ -54,7 +55,7 @@ def home_search(request):
     }
     
     return render(request, 'search-result.html', context)
-
+@login_required(login_url='login')
 def place_order(request):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -73,3 +74,6 @@ def place_order(request):
         'grand_total': format_currency(grand_total),
     }
     return render(request, 'place-order.html', context)
+@login_required(login_url='login')
+def order_complete(request):
+    return render(request, 'order_complete.html')
