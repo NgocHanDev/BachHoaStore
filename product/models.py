@@ -5,23 +5,34 @@ from user.models import User
 from django.utils.text import slugify
     
 # Create your models here.
+class Holiday(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField()
+
+    def __str__(self):
+        return self.name
+
 class Product(models.Model):
     product_name = models.CharField(max_length=200, unique=True)
     slug = models.CharField(max_length=100, unique=True)
-    price = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
     description = models.TextField(max_length=255, blank=True)
     images = models.TextField(blank=True)
     is_available = models.BooleanField(default=True)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
-    
+    expiry_date = models.DateField(null=True, blank=True)
+    is_holiday_promotion = models.BooleanField(default=False)
+    holiday_promotion_type = models.CharField(max_length=50, choices=[('buy2get1', 'Mua 2 tặng 1'), ('discount10', 'Giảm 10%')], null=True, blank=True)
+    holidays = models.ManyToManyField(Holiday, blank=True)
+
     sub_cate = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
     cate = models.ForeignKey(Category, on_delete=models.CASCADE)
-    
-        
+
     def __str__(self):
         return self.product_name
+
     def get_url(self):
         return reverse('product_detail', args=[self.cate.slug, self.sub_cate.slug, self.slug])
     

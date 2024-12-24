@@ -32,4 +32,5 @@ urlpatterns = [
         path('search/', views.home_search, name='home_search'),
         path('place_order/', views.place_order, name='place_order'),
           path('order_complete/', views.order_complete, name='order_complete'),
+          path('flash_sale/', include('flash_sale.urls')), 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
