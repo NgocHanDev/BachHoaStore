@@ -106,9 +106,9 @@
             </div>
             {% else %}
             <div class="widget-header">
-              <small class="title text-muted">Xin chào: {{user.full_name}}!</small>
+              <small class="title text-muted">Xin chào: {{user.get_full_name}}!</small>
               <div>
-                <a href="#">Thông tin</a>
+                <a href="{% url 'profile' %}">Thông tin</a>
                 <span class="dark-transp"> | </span>
                 <a href="{% url 'logout'%}">Đăng xuất</a>
               </div>

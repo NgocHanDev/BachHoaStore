@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="section-conten padding-y bg">
+
+{% include 'includes/alerts.html' %}
+<div class="container">
+    <div class="row">
+        <aside class="col-md-3">
+            <!--   SIDEBAR   -->
+            <ul class="list-group">
+                <a class="list-group-item" href="#" onclick="showSection('user-info', this)"> Thông tin người dùng </a>
+                <a class="list-group-item" href="#" onclick="showSection('order-history', this)"> Lịch sử đặt hàng </a>
+                <a class="list-group-item" href="#" onclick="showSection('shipping-orders', this)"> Đang giao </a>
+                <a class="list-group-item" href="#" onclick="showSection('return-orders', this)"> Trả hàng và hoàn tiền </a>
+            </ul>
+            <br>
+            <a class="btn btn-light btn-block" href="{% url 'logout' %}"> <i class="fa fa-power-off"></i> <span class="text">Đăng xuất</span> </a>
+            <!--   SIDEBAR .//END   -->
+        </aside>
+        <main class="col-md-9">
+            <!-- USER INFORMATION -->
+            <section id="user-info" class="user-info mb-4">
+                <article class="card mb-4">
+                    <header class="card-header">
+                        <strong>Thông tin người dùng</strong>
+                    </header>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                <img src="{{ user.avatar_url|default:'../images/default-avatar.png' }}" alt="Avatar" class="rounded-circle img-thumbnail" width="100">
+                            </div>
+                            <div class="col-md-9">
+                                <h4>{{ user.full_name }}</h4>
+                                <p><strong>Số điểm tích lũy:</strong> {{ user.get_total_reward_points }} điểm</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="card mb-4">
+                    <header class="card-header">
+                        <strong>Địa chỉ</strong>
+                    </header>
+                    <div class="card-body">
+                        <p><strong>Địa chỉ chi tiết:</strong> {{ user.address|default:'Chưa có thông tin' }}</p>
+                        <p><strong>Thành phố:</strong> {{ user.city|default:'Chưa có thông tin' }}</p>
+                        <p><strong>Địa chỉ giao hàng mặc định:</strong> {{ user.default_address|default:'Chưa có thông tin' }}</p>
+                        <button class="btn btn-primary" onclick="toggleAddressForm()">Cập nhật địa chỉ</button>
+                        <form method="post" id="address-form" style="display: none;">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="id_address"><strong>Địa chỉ chi tiết:</strong></label>
+                                {{ form.address }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_city"><strong>Thành phố:</strong></label>
+                                {{ form.city }}
+                            </div>
+                            <div class="form-group form-check">
+                                <label class="form-check-label" for="id_default_address">
+                                    {{ form.default_address }} Đặt làm địa chỉ mặc định
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                        </form>
+                    </div>
+                </article>
+
+                <article class="card mb-4">
+                    <header class="card-header">
+                        <strong>Thông tin liên hệ</strong>
+                    </header>
+                    <div class="card-body">
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        <p><strong>Số điện thoại:</strong> {{ user.phone_number }}</p>
+                    </div>
+                </article>
+            </section>
+            <!-- END USER INFORMATION -->
+
+            <!-- ORDER HISTORY -->
+            <section id="order-history" class="order-history" style="display: none;">
+                {% for order in history_orders %}
+                <article class="card mb-4">
+                    <header class="card-header">
+                        <strong class="d-inline-block mr-3">Mã đơn hàng: {{ order.id }}</strong>
+                        <span>Ngày đặt: {{ order.date_ordered }}</span>
+                        <span class="badge badge-info">{{ order.status }}</span>
+                    </header>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted">Giao hàng đến</h6>
+                                <p>{{ order.recipient_name }} <br>
+                                Số điện thoại: {{ order.phone }} Email: {{ order.email }} <br>
+                                Địa chỉ: {{ order.address }} <br>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-muted">Thanh toán</h6>
+                                <span class="text-success">
+                                    <i class="fab fa-lg fa-cc-visa"></i>
+                                    Visa **** {{ order.payment_card_last4 }}
+                                </span>
+                                <p>Tạm tính: {{ order.subtotal }} VND <br>
+                                    Phí giao hàng: {{ order.shipping_fee }} VND <br>
+                                    <span class="b">Tổng: {{ order.total }} VND</span>
+                                </p>
+                            </div>
+                        </div> <!-- row.// -->
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <img src="{{ order.product.images }}" alt="{{ order.product.product_name }}" class="img-thumbnail">
+                            </div>
+                            <div class="col-md-9">
+                                <h5>{{ order.product.product_name }}</h5>
+                                <p>Giá: {{ order.product.price }} VND</p>
+                            </div>
+                        </div>
+                    </div> <!-- card-body .// -->
+                </article> <!-- order-group.// -->
+                {% endfor %}
+            </section>
+            <!-- END ORDER HISTORY -->
+
+            <!-- SHIPPING ORDERS -->
+            <section id="shipping-orders" class="shipping-orders" style="display: none;">
+                {% for order in shipping_orders %}
+                <article class="card mb-4">
+                    <header class="card-header">
+                        <strong class="d-inline-block mr-3">Mã đơn hàng: {{ order.id }}</strong>
+                        <span>Ngày đặt: {{ order.date_ordered }}</span>
+                        <span class="badge badge-info">{{ order.status }}</span>
+                    </header>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted">Giao hàng đến</h6>
+                                <p>{{ order.recipient_name }} <br>
+                                Số điện thoại: {{ order.phone }} Email: {{ order.email }} <br>
+                                Địa chỉ: {{ order.address }} <br>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-muted">Thanh toán</h6>
+                                <span class="text-success">
+                                    <i class="fab fa-lg fa-cc-visa"></i>
+                                    Visa **** {{ order.payment_card_last4 }}
+                                </span>
+                                <p>Tạm tính: {{ order.subtotal }} VND <br>
+                                    Phí giao hàng: {{ order.shipping_fee }} VND <br>
+                                    <span class="b">Tổng: {{ order.total }} VND</span>
+                                </p>
+                            </div>
+                        </div> <!-- row.// -->
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <img src="{{ order.product.images }}" alt="{{ order.product.product_name }}" class="img-thumbnail">
+                            </div>
+                            <div class="col-md-9">
+                                <h5>{{ order.product.product_name }}</h5>
+                                <p>Giá: {{ order.product.price }} VND</p>
+                            </div>
+                        </div>
+                    </div> <!-- card-body .// -->
+                </article> <!-- order-group.// -->
+                {% endfor %}
+            </section>
+            <!-- END SHIPPING ORDERS -->
+
+            <!-- RETURN ORDERS -->
+            <section id="return-orders" class="return-orders" style="display: none;">
+                {% for order in return_orders %}
+                <article class="card mb-4">
+                    <header class="card-header">
+                        <strong class="d-inline-block mr-3">Mã đơn hàng: {{ order.id }}</strong>
+                        <span>Ngày đặt: {{ order.date_ordered }}</span>
+                        <span class="badge badge-info">{{ order.status }}</span>
+                    </header>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="text-muted">Giao hàng đến</h6>
+                                <p>{{ order.recipient_name }} <br>
+                                Số điện thoại: {{ order.phone }} Email: {{ order.email }} <br>
+                                Địa chỉ: {{ order.address }} <br>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-muted">Thanh toán</h6>
+                                <span class="text-success">
+                                    <i class="fab fa-lg fa-cc-visa"></i>
+                                    Visa **** {{ order.payment_card_last4 }}
+                                </span>
+                                <p>Tạm tính: {{ order.subtotal }} VND <br>
+                                    Phí giao hàng: {{ order.shipping_fee }} VND <br>
+                                    <span class="b">Tổng: {{ order.total }} VND</span>
+                                </p>
+                                <p><strong>Lý do hoàn tiền:</strong> {{ order.return_reason }}</p>
+                            </div>
+                        </div> <!-- row.// -->
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <img src="{{ order.product.images }}" alt="{{ order.product.product_name }}" class="img-thumbnail">
+                            </div>
+                            <div class="col-md-9">
+                                <h5>{{ order.product.product_name }}</h5>
+                                <p>Giá: {{ order.product.price }} VND</p>
+                            </div>
+                        </div>
+                    </div> <!-- card-body .// -->
+                </article> <!-- order-group.// -->
+                {% endfor %}
+            </section>
+            <!-- END RETURN ORDERS -->
+        </main>
+    </div> <!-- row.// -->
+</div>
+
+</section>
+
+<script>
+function showSection(sectionId, element) {
+    // Hide all sections
+    document.querySelectorAll('main section').forEach(section => {
+        section.style.display = 'none';
+    });
+    // Show the selected section
+    document.getElementById(sectionId).style.display = 'block';
+    
+    // Remove 'active' class from all list-group-item
+    document.querySelectorAll('.list-group-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    // Add 'active' class to the clicked list-group-item
+    element.classList.add('active');
+}
+
+function toggleAddressForm() {
+    var form = document.getElementById('address-form');
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+</script>
+
+{% endblock %}
