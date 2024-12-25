@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'category',
     'user',
     'product',
-    'cart'
+    'cart',
+    'payment',
+    'flash_sale',
 ]
 
 MIDDLEWARE = [
@@ -142,3 +144,8 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.ERROR: 'danger'
 }
+VNPAY_RETURN_URL = 'http://localhost:8000/payment_return'  # URL để nhận kết quả thanh toán
+VNPAY_PAYMENT_URL = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'  # URL thanh toán VNPAY
+VNPAY_API_URL = 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'  # API URL cho giao dịch
+VNPAY_TMN_CODE = 'Q1M2EMS0'  # Mã Website của Merchant trong hệ thống VNPAY
+VNPAY_HASH_SECRET_KEY = 'UZH2FL7CO9QCD274YBYXKOZ71E5EGPNFE'  # Chuỗi bí mật dùng để tạo checksum
