@@ -1,137 +1,132 @@
-{% extends "base.html" %} {% load static %} {% block content %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
 
 <div class="container">
-  <!-- Banner -->
-  <div class="intro-banner-wrap">
-    <img
-      src="https://i.postimg.cc/RhZZ69gk/result-banner.jpg"
-      alt="banner"
-      class="img-fluid"
-    />
-  </div>
 
-  <h2 class="title-section">Sản Phẩm Sắp Hết Hạn</h2>
-  <div class="row">
-    {% if expiring_soon_products %} {% for product in expiring_soon_products %}
-    <div class="col-md-4">
-      <figure class="card card-product-grid">
-        <div class="img-wrap">
-          <a href="{{ product.get_url }}">
-            <img src="{{ product.images }}" alt="{{ product.product_name }}" />
-          </a>
-        </div>
-        <figcaption class="info-wrap">
-          <div class="fix-height">
-            <a href="{{ product.get_url }}" class="title"
-              >{{ product.product_name }}</a
-            >
-            <div class="price-wrap mt-2">
-              <span class="price">{{ product.discounted_price }} VND</span>
-              <del class="price-old">{{ product.price }} VND</del>
-            </div>
-          </div>
-          <p class="expiry-date">Hạn sử dụng: {{ product.expiry_date }}</p>
-          <a href="{% url 'add_cart' product.id %}" class="btn btn-primary"
-            >Thêm vào giỏ hàng</a
-          >
-        </figcaption>
-      </figure>
+    <!-- Banner -->
+    <div class="intro-banner-wrap">
+        <img src="https://i.postimg.cc/RhZZ69gk/result-banner.jpg" alt="banner" class="img-fluid">
     </div>
-    {% endfor %} {% else %}
-    <p class="text-center">Không có sản phẩm sắp hết hạn khuyến mãi hôm nay.</p>
-    {% endif %}
-  </div>
 
-  <h2 class="title-section">Sản Phẩm Khuyến Mãi Ngày Lễ</h2>
-  <div class="row">
-    {% if holiday_promotion_products %} {% for product in
-    holiday_promotion_products %}
-    <div class="col-md-4">
-      <figure class="card card-product-grid">
-        <div class="img-wrap">
-          <a href="{{ product.get_url }}">
-            <img src="{{ product.images }}" alt="{{ product.product_name }}" />
-          </a>
-        </div>
-        <figcaption class="info-wrap">
-          <div class="fix-height">
-            <a href="{{ product.get_url }}" class="title"
-              >{{ product.product_name }}</a
-            >
-            <div class="price-wrap mt-2">
-              {% if product.holiday_promotion_type == 'discount10' %}
-              <p class="discount">Giảm giá: 10%</p>
-              <span class="price">{{ product.discounted_price }} VND</span>
-              <del class="price-old">{{ product.price }} VND</del>
-              {% elif product.holiday_promotion_type == 'buy2get1' %}
-              <p class="discount">Khuyến mãi: Mua 2 tặng 1</p>
-              <span class="price">{{ product.price }} VND</span>
-              {% endif %}
+    <h2 class="title-section">Sản Phẩm Khuyến Mãi Sốc</h2>
+    <div class="row">
+        {% if expiring_soon_products %}
+            {% for product in expiring_soon_products %}
+            <div class="col-md-4">
+                <figure class="card card-product-grid">
+                    <div class="img-wrap">
+                        <a href="{{ product.get_url }}">
+                            <img src="{{ product.images }}" alt="{{ product.product_name }}">
+                        </a>
+                    </div>
+                    <figcaption class="info-wrap">
+                        <div class="fix-height">
+                            <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+                            <div class="price-wrap mt-2">
+                                <span class="price">{{ product.discounted_price }} VND</span>
+                                <del class="price-old">{{ product.price }} VND</del>
+                            </div>
+                        </div>
+                        <p class="expiry-date">Hạn sử dụng: {{ product.expiry_date }}</p>
+                        <a href="{% url 'add_cart' product.id %}" class="btn btn-primary">Thêm vào giỏ hàng</a>
+                    </figcaption>
+                </figure>
             </div>
-          </div>
-          <a href="{% url 'add_cart' product.id %}" class="btn btn-primary"
-            >Thêm vào giỏ hàng</a
-          >
-        </figcaption>
-      </figure>
+            {% endfor %}
+        {% else %}
+            <p class="text-center">Không có sản phẩm sắp hết hạn khuyến mãi hôm nay.</p>
+        {% endif %}
     </div>
-    {% endfor %} {% else %}
-    <p class="text-center">Không có sản phẩm khuyến mãi ngày lễ hôm nay.</p>
-    {% endif %}
-  </div>
+
+    <h2 class="title-section">Sản Phẩm Khuyến Mãi Ngày Lễ</h2>
+    <div class="row">
+        {% if holiday_promotion_products %}
+            {% for product in holiday_promotion_products %}
+            <div class="col-md-4">
+                <figure class="card card-product-grid">
+                    <div class="img-wrap">
+                        <a href="{{ product.get_url }}">
+                            <img src="{{ product.images }}" alt="{{ product.product_name }}">
+                        </a>
+                    </div>
+                    <figcaption class="info-wrap">
+                        <div class="fix-height">
+                            <a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
+                            <div class="price-wrap mt-2">
+                                {% if product.holiday_promotion_type == 'discount10' %}
+                                <p class="discount">Giảm giá: 10%</p>
+                                <span class="price">{{ product.discounted_price }} VND</span>
+                                <del class="price-old">{{ product.price }} VND</del>
+                                {% elif product.holiday_promotion_type == 'buy2get1' %}
+                                <p class="discount">Khuyến mãi: Mua 2 tặng 1</p>
+                                <span class="price">{{ product.price }} VND</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <a href="{% url 'add_cart' product.id %}" class="btn btn-primary">Thêm vào giỏ hàng</a>
+                    </figcaption>
+                </figure>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center">Không có sản phẩm khuyến mãi ngày lễ hôm nay.</p>
+        {% endif %}
+    </div>
 </div>
 
 <style>
-  .img-wrap img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-  }
+    .img-wrap img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
 
-  .info-wrap .title {
-    font-size: 1.2em;
-    margin: 10px 0;
-    color: #007bff;
-  }
+    .info-wrap .title {
+        font-size: 1.2em;
+        margin: 10px 0;
+        color: #007bff;
+    }
 
-  .price-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
+    .price-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
 
-  .price-wrap .price {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #28a745;
-  }
+    .price-wrap .price {
+        font-size: 1.1em;
+        font-weight: bold;
+        color: #28a745;
+    }
 
-  .price-wrap .price-old {
-    font-size: 0.9em;
-    color: #dc3545;
-    text-decoration: line-through;
-  }
+    .price-wrap .price-old {
+        font-size: 0.9em;
+        color: #dc3545;
+        text-decoration: line-through;
+    }
 
-  .discount {
-    font-size: 1em;
-    color: #dc3545;
-    font-weight: bold;
-    margin-top: 5px;
-    line-height: 1.2;
-  }
+    .discount {
+        font-size: 1em;
+        color: #dc3545;
+        font-weight: bold;
+        margin-top: 5px;
+        line-height: 1.2;
+    }
 
-  .expiry-date {
-    font-size: 0.9em;
-    color: #6c757d;
-  }
+    .expiry-date {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
 
-  .fix-height {
-    min-height: 150px;
-  }
+    .fix-height {
+        min-height: 150px;
+    }
 
-  .card-product-grid {
-    overflow: visible;
-  }
+    .card-product-grid {
+        overflow: visible;
+    }
 </style>
 {% endblock %}
