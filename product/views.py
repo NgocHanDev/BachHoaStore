@@ -94,6 +94,7 @@ def product_detail(request, category_slug=None, sub_category_slug=None, product_
         pass
 
     single_product.price = format_currency(single_product.price)
+    #recommendation
     database = 'db.sqlite3'
     try:
         conn = sqlite3.connect(database)
@@ -123,6 +124,10 @@ def product_detail(request, category_slug=None, sub_category_slug=None, product_
 
         # Get similarity scores for the selected product
         similar_products = list(enumerate(similar[selected_product_index]))
+        similar_products = [
+        (index, score) for index, score in similar_products 
+        if score > 0.2 and index != selected_product_index
+    ]
         # Sort the products based on similarity scores
         similar_products = sorted(similar_products, key=lambda x: x[1], reverse=True)
         # Exclude the selected product itself and get top 5 recommendations
