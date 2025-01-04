@@ -12,8 +12,10 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from urllib.parse import quote as urlquote
 from BachHoaStore import settings
-from payment.models import PaymentForm
+from payment.models import PaymentForm, Payment_VNPay
 from payment.vnpay import vnpay
+from datetime import datetime
+
 
 def index(request):
     return render(request, "payment/index.html", {"title": "Danh sách demo"})
@@ -268,3 +270,137 @@ def refund(request):
         response_json = {"error": f"Request failed with status code: {response.status_code}"}
 
     return render(request, "payment/refund.html", {"title": "Kết quả hoàn tiền giao dịch", "response_json": response_json})
+
+def query(request):
+    userLogin = "hidden"
+    userNotLogin = "visible"
+    cartItems = 0
+
+    # Kiểm tra xem người dùng đã đăng nhập chưa
+    if request.user.is_authenticated:
+        userLogin = "visible"
+        userNotLogin = "hidden"
+
+        order, created = Order.objects.get_or_create(customer=request.user, complete=False)
+        cartItems = order.getCartItems  # Lấy tổng số mục trong giỏ hàng
+
+    # Xử lý khi người dùng gửi form kiểm tra giao dịch
+    if request.method == 'POST':
+        # Lấy mã hóa đơn từ form
+        vnp_TxnRef = request.POST.get('order_id')  # Mã đơn hàng
+
+        # Kiểm tra xem mã giao dịch có tồn tại trong cơ sở dữ liệu không
+        try:
+            payment_info = Payment_VNPay.objects.get(order_id=vnp_TxnRef)
+        except Payment_VNPay.DoesNotExist:
+            payment_info = None
+
+        # Kiểm tra nếu không có giao dịch tương ứng
+        if payment_info is None:
+            response_json = {"error": "Không tìm thấy giao dịch với mã đơn hàng này."}
+        else:
+            # Trả về thông tin giao dịch từ cơ sở dữ liệu
+            response_json = {
+                "vnp_TxnRef": payment_info.order_id,
+                "vnp_Amount": payment_info.amount,
+                "vnp_OrderInfo": payment_info.order_desc,
+                "vnp_TransactionNo": payment_info.vnp_TransactionNo,
+                "vnp_ResponseCode": payment_info.vnp_ResponseCode,
+            }
+
+        # Trả kết quả về template
+        return render(request, "payment/query.html", {
+            "title": "Kiểm tra kết quả giao dịch",
+            "response_json": response_json,
+            "userLogin": userLogin,
+            "userNotLogin": userNotLogin,
+            "cartItems": cartItems,
+        })
+
+    # Hiển thị trang mặc định nếu không có POST request
+    return render(request, "payment/query.html", {
+        "title": "Kiểm tra kết quả giao dịch",
+        "userLogin": userLogin,
+        "userNotLogin": userNotLogin,
+        "cartItems": cartItems,
+    })
+
+
+
+def refund(request):
+    # Khởi tạo trạng thái mặc định cho biến
+    userLogin = "hidden"
+    userNotLogin = "visible"
+    
+    # Kiểm tra trạng thái xác thực của người dùng
+    if request.user.is_authenticated:
+        userLogin = "visible"
+        userNotLogin = "hidden"
+
+        order, created = Order.objects.get_or_create(customer=request.user, complete=False)
+        cartItems = order.getCartItems    
+    if request.method == 'GET':
+        return render(request, "payment/refund.html", {
+            "title": "Hoàn tiền giao dịch",
+            "userLogin": userLogin,
+            "userNotLogin": userNotLogin,
+            "cartItems": cartItems,
+        })
+
+    url = settings.VNPAY_API_URL
+    secret_key = settings.VNPAY_HASH_SECRET_KEY
+    vnp_TmnCode = settings.VNPAY_TMN_CODE
+    vnp_RequestId = n_str
+    vnp_Version = '2.1.0'
+    vnp_Command = 'refund'
+    vnp_TransactionType = request.POST['TransactionType']
+    vnp_TxnRef = request.POST['order_id']
+    vnp_Amount = request.POST['amount']
+    vnp_OrderInfo = request.POST['order_desc']
+    vnp_TransactionNo = '0'
+    vnp_TransactionDate = request.POST['trans_date']
+    vnp_CreateDate = datetime.now().strftime('%Y%m%d%H%M%S')
+    vnp_CreateBy = 'user01'
+    vnp_IpAddr = get_client_ip(request)
+
+    hash_data = "|".join([
+        vnp_RequestId, vnp_Version, vnp_Command, vnp_TmnCode, vnp_TransactionType, vnp_TxnRef,
+        vnp_Amount, vnp_TransactionNo, vnp_TransactionDate, vnp_CreateBy, vnp_CreateDate,
+        vnp_IpAddr, vnp_OrderInfo
+    ])
+
+    secure_hash = hmac.new(secret_key.encode(), hash_data.encode(), hashlib.sha512).hexdigest()
+
+    data = {
+        "vnp_RequestId": vnp_RequestId,
+        "vnp_TmnCode": vnp_TmnCode,
+        "vnp_Command": vnp_Command,
+        "vnp_TxnRef": vnp_TxnRef,
+        "vnp_Amount": vnp_Amount,
+        "vnp_OrderInfo": vnp_OrderInfo,
+        "vnp_TransactionDate": vnp_TransactionDate,
+        "vnp_CreateDate": vnp_CreateDate,
+        "vnp_IpAddr": vnp_IpAddr,
+        "vnp_TransactionType": vnp_TransactionType,
+        "vnp_TransactionNo": vnp_TransactionNo,
+        "vnp_CreateBy": vnp_CreateBy,
+        "vnp_Version": vnp_Version,
+        "vnp_SecureHash": secure_hash
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+
+    if response.status_code == 200:
+        response_json = json.loads(response.text)
+    else:
+        response_json = {"error": f"Request failed with status code: {response.status_code}"}
+
+    return render(request, "payment/refund.html", {
+        "title": "Kết quả hoàn tiền giao dịch",
+        "response_json": response_json,
+        "userLogin": userLogin,
+        "userNotLogin": userNotLogin,
+        "cartItems": cartItems,
+    })
