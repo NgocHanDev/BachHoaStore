@@ -2,8 +2,8 @@ from django.db import models
 
 # Create your models here.
 from django import forms
-
-
+from user.models import User
+from cart.models import Cart
 class PaymentForm(forms.Form):
 
     order_id = forms.CharField(max_length=250)
@@ -15,6 +15,8 @@ class PaymentForm(forms.Form):
     
 class Payment_VNPay(models.Model):
     order_id = models.IntegerField(default=0, null=True, blank=True)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True, blank=True)
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     amount = models.FloatField(default=0.0, null=True, blank=True)
     order_desc = models.CharField(max_length=200, null=True, blank=True)
     vnp_TransactionNo = models.CharField(max_length=200, null = True, blank=True)
