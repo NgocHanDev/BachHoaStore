@@ -70,6 +70,12 @@ class User(AbstractBaseUser):
     def get_full_name(self):
         return self.full_name
     
+    def has_perm(self, perm, obj=None):
+        return self.is_admin
+
+    def has_module_perms(self, app_label):
+        return self.is_admin
+
     def __str__(self):
         return self.full_name
 
