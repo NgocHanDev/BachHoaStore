@@ -78,24 +78,18 @@
                 <form action="">
                   <div class="row">
                     <div class="form-group col-sm-6">
-                      <label>Họ Tên</label>
-                      <input
-                        type="text"
-                        placeholder="Họ tên.."
-                        class="form-control"
-                      />
+                      <p><strong>Họ tên : </strong> {{ user.full_name }}</p>
+                   
                     </div>
                     <div class="form-group col-sm-6">
-                      <label>Số điện thoại</label>
-                      <input type="text" value="+998" class="form-control" />
+                      
+                        <p><strong>Số điện thoại:</strong> {{ user.phone_number }}</p>
+                   
                     </div>
                     <div class="form-group col-sm-6">
-                      <label>Email</label>
-                      <input
-                        type="email"
-                        placeholder="example@gmail.com"
-                        class="form-control"
-                      />
+                      
+                      <p><strong>Email:</strong> {{ user.email }}</p>
+                      
                     </div>
                   </div>
                   <!-- row.// -->
@@ -104,12 +98,13 @@
               <!-- card-body.// -->
             </article>
             <!-- card.// -->
-
+            {%if user.address is null%}
             <article class="card mb-4">
               <div class="card-body">
                 <h4 class="card-title mb-4">Thông tin địa chỉ</h4>
                 <h6 class="card-title mb-4">Chỉ giao hàng ở TPHCM</h6>
-                <form action="">
+                <form id="address-form" action="{% url 'save_address' %}" method="POST">
+                  {% csrf_token %}
                   <div class="row">
                     <div class="form-group col-sm-6">
                       <label>Quận/Huyện</label>
@@ -134,12 +129,20 @@
                     </div>
                   </div>
                   <!-- row.// -->
+                  <button type="submit" class="btn btn-success">Lưu địa chỉ</button>
                 </form>
               </div>
               <!-- card-body.// -->
             </article>
             <!-- card.// -->
-
+            {%else%}
+            <article class="card mb-4">
+              <div class="card-body">
+                <h4 class="card-title mb-4">Thông tin địa chỉ</h4>
+                <p><strong>Địa chỉ : </strong> {{ user.address }}</p>
+              </div>
+            </article>
+            {%endif%}
             <article class="accordion" id="accordion_pay">
               <div class="card">
                 <header class="card-header">
@@ -327,6 +330,50 @@ của mình.
               });
             });
         });
+        // Gửi dữ liệu khi form được submit
+    const addressForm = document.getElementById("address-form");
+    addressForm.addEventListener("submit", (event) => {
+      event.preventDefault(); // Ngừng hành động mặc định của form (reload trang)
+
+      // Lấy các giá trị từ form
+      const district = dicstrict.value;
+      const wardValue = ward.value;
+      const streetAddress = document.querySelector('input[name="street_address"]').value;
+
+      // Kiểm tra các giá trị hợp lệ
+      if (!district || !wardValue || !streetAddress) {
+        alert("Vui lòng điền đầy đủ thông tin địa chỉ.");
+        return;
+      }
+
+      // Gửi yêu cầu POST đến server để lưu địa chỉ
+      fetch("{% url 'save_address' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+          district: district,
+          ward: wardValue,
+          street_address: streetAddress,
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert(data.message);
+          // Redirect sau khi lưu thành công
+          window.location.reload();  // Hoặc có thể chuyển hướng đến trang khác
+        } else {
+          alert("Có lỗi xảy ra, vui lòng thử lại!");
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Có lỗi xảy ra khi lưu địa chỉ.");
+      });
+    });
       };
       
     </script>
