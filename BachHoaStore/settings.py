@@ -31,6 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    
+      'django_celery_beat',
+    'django_celery_results',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -149,3 +152,17 @@ VNPAY_PAYMENT_URL = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'  # URL 
 VNPAY_API_URL = 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'  # API URL cho giao dịch
 VNPAY_TMN_CODE = 'Q1M2EMS0'  # Mã Website của Merchant trong hệ thống VNPAY
 VNPAY_HASH_SECRET_KEY = 'ZH2FL7CO9QCD274YBYXKOZ71E5EGPNFE'  # Chuỗi bí mật dùng để tạo checksum
+
+
+# Sử dụng Redis làm broker
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+# Lưu kết quả vào Redis (hoặc có thể dùng Database)
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Cấu hình chuỗi serializer
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+# Múi giờ Celery
+CELERY_TIMEZONE = 'Asia/Ho_Chi_Minh'

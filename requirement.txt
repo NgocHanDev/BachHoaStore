@@ -1,0 +1,10 @@
+Django
+pandas
+celery
+django-celery-beat
+django-celery-results
+scikit-learn
+requests
+Pillow
+redis
+kombu
