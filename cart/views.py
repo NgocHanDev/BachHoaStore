@@ -97,3 +97,14 @@ def add_cart(request, product_id):
         )
         cart_item.save()
     return redirect(request.META['HTTP_REFERER'])
+
+def get_cart_total(request):
+    total = 0
+    try:
+        cart = Cart.objects.get(cart_id = _generate_cart_id(request))
+        cart_items = CartItem.objects.filter(cart = cart, is_active = True)
+        for cart_item in cart_items:
+            total += (cart_item.product.price * cart_item.quantity)
+    except Cart.DoesNotExist:
+        pass
+    return total
