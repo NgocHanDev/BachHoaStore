@@ -173,253 +173,392 @@
     {% endif %}
 
     <!-- ============================ REVIEWS SECTION ================================= -->
-    <div class="mt-5">
-      <h3 class="text-primary">Đánh giá sản phẩm</h3>
-      <div id="review-summary" class="bg-light p-3 rounded">
-        <p class="mb-1">
-          <strong>Trung bình sao:</strong>
-          <span class="text-warning"
-            >{{ average_rating|floatformat:1 }} / 5</span
-          >
-        </p>
-        <p><strong>Tổng đánh giá:</strong> {{ review_count }}</p>
-      </div>
+<div class="mt-5">
+  <h3 class="text-primary">Đánh giá sản phẩm</h3>
+  <div id="review-summary" class="bg-light p-3 rounded">
+    <p class="mb-1">
+      <strong>Trung bình sao:</strong>
+      <span class="text-warning">{{ average_rating|floatformat:1 }} / 5</span>
+    </p>
+    <p><strong>Tổng đánh giá:</strong> {{ review_count }}</p>
+  </div>
 
-      <div id="reviews" class="mt-4">
-        {% for review in reviews %}
-        <div
-          class="review-item mb-4 p-3 border rounded"
-          id="review-{{ review.id }}"
-        >
-          <div class="d-flex align-items-center mb-2">
-            <img
-              src="{% static 'images/default-avatar.png' %}"
-              alt="Avatar"
-              class="rounded-circle"
-              width="50"
-              height="50"
-            />
-            <p class="ml-2"><strong>{{ review.user.full_name }}</strong></p>
-          </div>
-          <p><span class="text-warning">{{ review.rating }} &#9733;</span></p>
-          <p>{{ review.review }}</p>
-          {% if review.image %}
+  <div id="reviews" class="mt-4">
+    {% for review in reviews %}
+      {% if not review.flagged_as_spam %}
+      <!-- Đánh giá hợp lệ -->
+      <div class="review-item mb-4 p-3 border rounded" id="review-{{ review.id }}">
+        <div class="d-flex align-items-center mb-2">
           <img
-            src="{{ review.image.url }}"
-            alt="Review Image"
-            class="img-fluid rounded"
+            src="{% static 'images/default-avatar.png' %}"
+            alt="Avatar"
+            class="rounded-circle"
+            width="50"
+            height="50"
           />
-          {% endif %} {% if review.video %}
-          <video controls class="img-fluid rounded">
-            <source src="{{ review.video.url }}" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          {% endif %}
-          <div class="mt-2">
-            <form
-              action="{% url 'like_review' review.id %}"
-              method="POST"
-              style="display: inline"
-            >
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline-primary btn-sm">
-                Thích ({{ review.likes.count }})
-              </button>
-            </form>
-            <form
-              action="{% url 'dislike_review' review.id %}"
-              method="POST"
-              style="display: inline"
-            >
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline-secondary btn-sm">
-                Không thích ({{ review.dislikes.count }})
-              </button>
-            </form>
-            <button
-              class="btn btn-outline-success btn-sm"
-              onclick="document.getElementById('reply-form-{{ review.id }}').style.display='block'"
-            >
-              Trả lời
-            </button>
-            {% if review.user == user %}
-            <a
-              href="{% url 'edit_review' review.id %}"
-              class="btn btn-outline-info btn-sm"
-              >Chỉnh sửa</a
-            >
-            <a
-              href="{% url 'delete_review' review.id %}"
-              class="btn btn-outline-danger btn-sm"
-              onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');"
-              >Xóa</a
-            >
-            {% endif %}
-          </div>
-          <div
-            class="reply-form mt-2"
-            id="reply-form-{{ review.id }}"
-            style="display: none"
-          >
-            <form action="{% url 'reply_review' review.id %}" method="POST">
-              {% csrf_token %}
-              <textarea
-                class="form-control mb-2"
-                name="reply"
-                placeholder="Viết phản hồi..."
-              ></textarea>
-              <button type="submit" class="btn btn-primary btn-sm">
-                Gửi phản hồi
-              </button>
-            </form>
-          </div>
-          <div class="replies mt-2">
-            {% for reply in review.replies.all %}
-            <div class="reply-item ml-4 mt-2 p-2 bg-light border rounded">
-              <div class="d-flex align-items-center mb-2">
-                <img
-                  src="{% static 'images/default-avatar.png' %}"
-                  alt="Avatar"
-                  class="rounded-circle"
-                  width="40"
-                  height="40"
-                />
-                <p class="ml-2">
-                  <strong>{{ reply.user.full_name }}</strong> phản hồi
-                  <strong>{{ review.user.full_name }}</strong>
-                </p>
-              </div>
-              <p>{{ reply.reply }}</p>
-              <div class="mt-2">
-                <form
-                  action="{% url 'like_review' reply.id %}"
-                  method="POST"
-                  style="display: inline"
-                >
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-outline-primary btn-sm">
-                    Thích ({{ reply.likes.count }})
-                  </button>
-                </form>
-                <form
-                  action="{% url 'dislike_review' reply.id %}"
-                  method="POST"
-                  style="display: inline"
-                >
-                  {% csrf_token %}
-                  <button
-                    type="submit"
-                    class="btn btn-outline-secondary btn-sm"
-                  >
-                    Không thích ({{ reply.dislikes.count }})
-                  </button>
-                </form>
-                {% if reply.user == user %}
-                <a
-                  href="{% url 'edit_reply' reply.id %}"
-                  class="btn btn-outline-info btn-sm"
-                  >Chỉnh sửa</a
-                >
-                <a
-                  href="{% url 'delete_reply' reply.id %}"
-                  class="btn btn-outline-danger btn-sm"
-                  onclick="return confirm('Bạn có chắc chắn muốn xóa phản hồi này?');"
-                  >Xóa</a
-                >
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %} {% if review.replies.count > 2 %}
-            <button
-              class="btn btn-link btn-sm show-more-replies"
-              data-review-id="{{ review.id }}"
-            >
-              Xem thêm {{ review.replies.count|add:"-2" }} phản hồi
-            </button>
-            {% endif %}
-          </div>
+          <p class="ml-2"><strong>{{ review.user.full_name }}</strong></p>
         </div>
-        {% endfor %}
+        <p><span class="text-warning">{{ review.rating }} &#9733;</span></p>
+        <p>{{ review.review }}</p>
+        
+        {% if review.image %}
+        <img
+          src="{{ review.image.url }}"
+          alt="Review Image"
+          class="img-fluid rounded"
+        />
+        {% endif %}
+
+        {% if review.video %}
+        <video controls class="img-fluid rounded">
+          <source src="{{ review.video.url }}" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        {% endif %}
+
+        <div class="mt-2">
+          <!-- Nút Thích -->
+          <form
+            action="{% url 'like_review' review.id %}"
+            method="POST"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+              Thích ({{ review.likes.count }})
+            </button>
+          </form>
+          
+          <!-- Nút Không thích -->
+          <form
+            action="{% url 'dislike_review' review.id %}"
+            method="POST"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-secondary btn-sm">
+              Không thích ({{ review.dislikes.count }})
+            </button>
+          </form>
+          
+          <!-- Nút Trả lời -->
+          <button
+            class="btn btn-outline-success btn-sm"
+            onclick="document.getElementById('reply-form-{{ review.id }}').style.display='block'"
+          >
+            Trả lời
+          </button>
+
+          {% if review.user == user %}
+          <!-- Nút Chỉnh sửa và Xóa -->
+          <a
+            href="{% url 'edit_review' review.id %}"
+            class="btn btn-outline-info btn-sm"
+            >Chỉnh sửa</a
+          >
+          <a
+            href="{% url 'delete_review' review.id %}"
+            class="btn btn-outline-danger btn-sm"
+            onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');"
+            >Xóa</a
+          >
+          {% endif %}
+        </div>
+
+        <!-- Form Trả lời -->
+        <div
+          class="reply-form mt-2"
+          id="reply-form-{{ review.id }}"
+          style="display: none"
+        >
+          <form action="{% url 'reply_review' review.id %}" method="POST">
+            {% csrf_token %}
+            <textarea
+              class="form-control mb-2"
+              name="reply"
+              placeholder="Viết phản hồi..."
+              required
+            ></textarea>
+            <button type="submit" class="btn btn-primary btn-sm">
+              Gửi phản hồi
+            </button>
+          </form>
+        </div>
+
+        <!-- Các Phản hồi -->
+        <div class="replies mt-2">
+          {% for reply in review.replies.all %}
+          <div class="reply-item ml-4 mt-2 p-2 bg-light border rounded">
+            <div class="d-flex align-items-center mb-2">
+              <img
+                src="{% static 'images/default-avatar.png' %}"
+                alt="Avatar"
+                class="rounded-circle"
+                width="40"
+                height="40"
+              />
+              <p class="ml-2">
+                <strong>{{ reply.user.full_name }}</strong> phản hồi
+                <strong>{{ review.user.full_name }}</strong>
+              </p>
+            </div>
+            <p>{{ reply.reply }}</p>
+            <div class="mt-2">
+              <!-- Nút Thích phản hồi -->
+              <form
+                action="{% url 'like_review' reply.id %}"
+                method="POST"
+                style="display: inline"
+              >
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary btn-sm">
+                  Thích ({{ reply.likes.count }})
+                </button>
+              </form>
+
+              <!-- Nút Không thích phản hồi -->
+              <form
+                action="{% url 'dislike_review' reply.id %}"
+                method="POST"
+                style="display: inline"
+              >
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                  Không thích ({{ reply.dislikes.count }})
+                </button>
+              </form>
+
+              {% if reply.user == user %}
+              <!-- Nút Chỉnh sửa và Xóa phản hồi -->
+              <a
+                href="{% url 'edit_reply' reply.id %}"
+                class="btn btn-outline-info btn-sm"
+                >Chỉnh sửa</a
+              >
+              <a
+                href="{% url 'delete_reply' reply.id %}"
+                class="btn btn-outline-danger btn-sm"
+                onclick="return confirm('Bạn có chắc chắn muốn xóa phản hồi này?');"
+                >Xóa</a
+              >
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+
+          {% if review.replies.count > 2 %}
+          <button
+            class="btn btn-link btn-sm show-more-replies"
+            data-review-id="{{ review.id }}"
+          >
+            Xem thêm {{ review.replies.count|add:"-2" }} phản hồi
+          </button>
+          {% endif %}
+        </div>
       </div>
-      {% if review_count == 0 %}
-      <p class="text-muted">Hãy là người đầu tiên đánh giá sản phẩm!</p>
       {% endif %}
+    {% endfor %}
+
+    {% if review_count == 0 %}
+    <p class="text-muted">Hãy là người đầu tiên đánh giá sản phẩm!</p>
+    {% endif %}
+  </div>
+<!-- ============================ FLAGGED REVIEWS ================================= -->
+{% if flagged_reviews %}
+<div class="mt-4">
+  <h4>Đánh giá bị gắn cờ</h4>
+  {% for review in flagged_reviews %}
+  <div class="review-item mb-4 p-3 border rounded bg-warning" id="flagged-review-{{ review.id }}">
+    <div class="d-flex align-items-center mb-2">
+      <img
+        src="{% static 'images/default-avatar.png' %}"
+        alt="Avatar"
+        class="rounded-circle"
+        width="50"
+        height="50"
+      />
+      <p class="ml-2"><strong>{{ review.user.full_name }}</strong></p>
+    </div>
+    <p><span class="text-warning">{{ review.rating }} &#9733;</span></p>
+    <p>{{ review.review }}</p>
+
+    <!-- Hiển thị hình ảnh nếu có -->
+    {% if review.image %}
+    <img
+      src="{{ review.image.url }}"
+      alt="Review Image"
+      class="img-fluid rounded"
+    />
+    {% endif %}
+
+    <!-- Hiển thị video nếu có -->
+    {% if review.video %}
+    <video controls class="img-fluid rounded">
+      <source src="{{ review.video.url }}" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    {% endif %}
+
+    <!-- Các nút thao tác -->
+    <div class="mt-2">
+      <!-- Nút Duyệt -->
+      <form
+        action="{% url 'approve_review' review.id %}"
+        method="POST"
+        style="display: inline"
+      >
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-success btn-sm">
+          Duyệt
+        </button>
+      </form>
+
+      <!-- Nút Xóa -->
+      <form
+        action="{% url 'delete_review_spam' review.id %}"
+        method="POST"
+        style="display: inline"
+      >
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+          Xóa
+        </button>
+      </form>
     </div>
   </div>
+  {% endfor %}
+</div>
+{% endif %}
+</div>
 </section>
 
 <style>
-  .rating {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-  }
+.rating {
+display: flex;
+flex-direction: row;
+justify-content: flex-start;
+}
 
-  .star {
-    font-size: 2rem;
-    color: #ddd;
-    cursor: pointer;
-    margin: 0 0.1rem;
-  }
+.star {
+font-size: 2rem;
+color: #ddd;
+cursor: pointer;
+margin: 0 0.1rem;
+}
 
-  .star:hover,
-  .star:hover ~ .star {
-    color: #ffc107;
-  }
+.star:hover,
+.star:hover ~ .star {
+color: #ffc107;
+}
 
-  input[type="radio"] + label {
-    color: #ddd;
-  }
+input[type="radio"] + label {
+color: #ddd;
+}
 
-  input[type="radio"]:checked + label {
-    color: #ffc107;
-  }
+input[type="radio"]:checked + label {
+color: #ffc107;
+}
 
-  input[type="radio"]:checked + label ~ label {
-    color: #ffc107;
-  }
+input[type="radio"]:checked + label ~ label {
+color: #ffc107;
+}
 
-  input[type="radio"] {
-    display: none;
-  }
+input[type="radio"] {
+display: none;
+}
 
-  .review-item {
-    background-color: #f8f9fa;
-  }
+.review-item {
+background-color: #f8f9fa;
+}
 
-  .reply-item {
-    font-size: 0.9rem;
-  }
+.reply-item {
+font-size: 0.9rem;
+}
 
-  .btn-outline-primary {
-    transition: all 0.3s ease;
-  }
+.btn-outline-primary {
+transition: all 0.3s ease;
+}
 
-  .btn-outline-primary:hover {
-    background-color: #007bff;
-    color: #fff;
-  }
+.btn-outline-primary:hover {
+background-color: #007bff;
+color: #fff;
+}
 </style>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".show-more-replies").forEach(function (button) {
-      button.addEventListener("click", function () {
-        const reviewId = this.getAttribute("data-review-id");
-        const replies = document.querySelectorAll(
-          `#review-${reviewId} .reply-item`
-        );
-        let hiddenReplies = Array.from(replies).filter(
-          (reply) => reply.style.display === "none"
-        );
-        hiddenReplies
-          .slice(0, 3)
-          .forEach((reply) => (reply.style.display = "block"));
-        if (hiddenReplies.length <= 3) {
-          this.style.display = "none";
-        }
-      });
-    });
+document.addEventListener("DOMContentLoaded", function () {
+document.querySelectorAll(".show-more-replies").forEach(function (button) {
+  button.addEventListener("click", function () {
+    const reviewId = this.getAttribute("data-review-id");
+    const replies = document.querySelectorAll(
+      `#review-${reviewId} .reply-item`
+    );
+    let hiddenReplies = Array.from(replies).filter(
+      (reply) => reply.style.display === "none"
+    );
+    hiddenReplies
+      .slice(0, 3)
+      .forEach((reply) => (reply.style.display = "block"));
+    if (hiddenReplies.length <= 3) {
+      this.style.display = "none";
+    }
   });
+});
+});
 </script>
+<script>
+  function handleReviewAction(url, reviewId, actionType) {
+      fetch(url, {
+          method: 'POST',
+          headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+          },
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert(data.success);
+  
+              if (actionType === 'approve') {
+                  // Di chuyển đánh giá từ danh sách "flagged_reviews" sang danh sách "reviews"
+                  const reviewItem = document.getElementById(`flagged-review-${reviewId}`);
+                  reviewItem.remove();
+                  document.getElementById('reviews-container').appendChild(reviewItem);
+                  reviewItem.classList.remove('bg-warning');
+              } else if (actionType === 'delete') {
+                  // Xóa đánh giá khỏi DOM
+                  document.getElementById(`flagged-review-${reviewId}`).remove();
+              }
+          } else if (data.error) {
+              alert(data.error);
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+  }
+  </script>
+  
+  {% for review in reviews %}
+    {% if review.id %}
+        <!-- Nút Duyệt -->
+        <button 
+            type="button" 
+            class="btn btn-outline-success btn-sm"
+            onclick="handleReviewAction('{% url 'approve_review' review.id %}', {{ review.id }}, 'approve')">
+            Duyệt
+        </button>
+
+        <!-- Nút Xóa -->
+        <button 
+            type="button" 
+            class="btn btn-outline-danger btn-sm"
+            onclick="handleReviewAction('{% url 'delete_review_spam' review.id %}', {{ review.id }}, 'delete')">
+            Xóa
+        </button>
+    {% else %}
+        <p>Lỗi: Không tìm thấy ID đánh giá.</p>
+    {% endif %}
+{% endfor %}
+  
 {% endblock %}

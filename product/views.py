@@ -14,6 +14,11 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from decimal import Decimal
+import json, os, re
+from django.conf import settings
+from langdetect import detect, LangDetectException
+from django.views.decorators.http import require_POST
+
 
 def product(request, category_slug=None, sub_category_slug=None):
     categories = None
@@ -71,6 +76,7 @@ def product(request, category_slug=None, sub_category_slug=None):
 def product_detail(request, category_slug=None, sub_category_slug=None, product_slug=None):
     in_cart = False
     reviews = []
+    flagged_reviews = []
     average_rating = 0
     review_count = 0
     recommended_products = []
@@ -87,6 +93,7 @@ def product_detail(request, category_slug=None, sub_category_slug=None, product_
         
         # Lấy đánh giá
         reviews = ReviewRating.objects.filter(product=single_product, status=True)
+        flagged_reviews = ReviewRating.objects.filter(product=single_product, flagged_as_spam=True)
         review_count = reviews.count()
         average_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
 
@@ -151,36 +158,120 @@ def product_detail(request, category_slug=None, sub_category_slug=None, product_
         'in_cart': in_cart,
         'recommended_products': recommended_products,
         'reviews': reviews,
+        'flagged_reviews': flagged_reviews,
         'average_rating': average_rating,
         'review_count': review_count,
     }
     return render(request, 'product/product_detail.html', context)
 
+def load_bad_words():
+    try:
+        with open(os.path.join(settings.BASE_DIR, 'media/photos/bad_words.json'), 'r', encoding='utf-8') as f:
+            bad_words = set(json.load(f).keys())
+    except FileNotFoundError:
+        bad_words = set()  # Nếu file không tồn tại, tránh lỗi
+    return bad_words
+
+def is_bad_word_present(review_text, bad_words):
+    for word in bad_words:
+        if word in review_text.lower():
+            return True
+    return False
+
+def is_spam(review_text):
+    # Kiểm tra dấu hiệu quảng cáo
+    if re.search(r'\b(buy now|click here|limited offer|mua ngay|đăng ký)\b', review_text.lower()) or re.search(r'\b(http|www|html|@|\.com)\b', review_text.lower()):
+        return True
+
+    # Kiểm tra tỷ lệ từ viết tắt hoặc không rõ nghĩa
+    words = review_text.split()
+    short_words = [word for word in words if len(word) <= 2]
+    if len(short_words) / len(words) > 0.5:
+        return True
+
+    return False
+
 def submit_review(request, product_id):
-    url = request.META.get('HTTP_REFERER')
+    url = request.META.get('HTTP_REFERER', '/')
     if request.method == 'POST':
         form = ReviewForm(request.POST, request.FILES)
         if form.is_valid():
             rating = form.cleaned_data.get('rating')
-            review_text = form.cleaned_data.get('review')
+            review_text = form.cleaned_data.get('review', '').lower()  # Chuyển chữ thường để kiểm tra spam
+
+            # Kiểm tra các điều kiện
             if not rating:
                 messages.error(request, 'Hãy đánh giá sao!')
             elif not review_text:
                 messages.error(request, 'Hãy viết đánh giá!')
             else:
-                try:
-                    review = ReviewRating.objects.get(user=request.user, product_id=product_id)
-                    form = ReviewForm(request.POST, request.FILES, instance=review)
-                except ReviewRating.DoesNotExist:
-                    review = form.save(commit=False)
-                    review.product_id = product_id
-                    review.user = request.user
-                    review.ip = request.META.get('REMOTE_ADDR')
-                review.save()
-                messages.success(request, 'Cảm ơn bạn! Đánh giá của bạn đã được gửi.')
+                bad_words = load_bad_words()
+                if is_bad_word_present(review_text, bad_words):
+                    messages.error(request, 'Nội dung đánh giá chứa từ ngữ không phù hợp. Vui lòng kiểm tra lại.')
+                else:
+                    try:
+                        lang = detect(review_text)
+                        if lang not in ['vi', 'en']:
+                            messages.error(request, 'Nội dung đánh giá phải bằng tiếng Việt hoặc tiếng Anh.')
+                            return redirect(url)
+                    except LangDetectException:
+                        messages.error(request, 'Không thể xác định ngôn ngữ của nội dung đánh giá.')
+                        return redirect(url)
+
+                    try:
+                        # Kiểm tra nếu người dùng đã có đánh giá trước đó
+                        review = ReviewRating.objects.get(user=request.user, product_id=product_id)
+                        form = ReviewForm(request.POST, request.FILES, instance=review)
+                    except ReviewRating.DoesNotExist:
+                        # Tạo đánh giá mới
+                        review = form.save(commit=False)
+                        review.product_id = product_id
+                        review.user = request.user
+                        review.ip = request.META.get('REMOTE_ADDR', '0.0.0.0')  # Fallback cho IP
+
+                    # Kiểm tra dấu hiệu spam
+                    if is_spam(review_text):
+                        review.flagged_as_spam = True
+                        review.status = False
+                        messages.warning(request, 'Đánh giá của bạn có dấu hiệu spam và sẽ được xem xét bởi quản trị viên.')
+                    else:
+                        review.status = True
+                        review.flagged_as_spam = False
+                        messages.success(request, 'Cảm ơn bạn! Đánh giá của bạn đã được gửi.')
+
+                    review.save()
         else:
-            messages.error(request, 'Có lỗi xảy ra. Vui lòng kiểm tra lại.')
+            messages.error(request, 'Có lỗi xảy ra trong form. Vui lòng kiểm tra lại.')
     return redirect(url)
+
+def approve_review(request, review_id):
+    if not request.user.is_admin:
+        messages.error(request, 'Bạn không có quyền thực hiện thao tác này.')
+        return redirect(request.META.get('HTTP_REFERER', '/'))  # Quay lại trang trước hoặc trang mặc định
+
+    review = get_object_or_404(ReviewRating, id=review_id)
+    review.flagged_as_spam = False
+    review.status = True
+    review.save()
+
+    messages.success(request, 'Đánh giá đã được duyệt.')
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@require_POST
+def delete_review_spam(request, review_id):
+    if not request.user.is_admin:
+        messages.error(request, 'Bạn không có quyền thực hiện thao tác này.')
+        return redirect(request.META.get('HTTP_REFERER', '/'))  # Quay lại trang trước hoặc trang mặc định
+    
+    try:
+        review = ReviewRating.objects.get(id=review_id)
+        review.delete()
+        messages.success(request, 'Đánh giá đã bị xóa.')
+    except ReviewRating.DoesNotExist:
+        messages.error(request, 'Đánh giá không tồn tại hoặc đã bị xóa.')
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 def edit_review(request, review_id):
     review = get_object_or_404(ReviewRating, id=review_id, user=request.user)

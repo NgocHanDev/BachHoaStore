@@ -3,7 +3,7 @@ from category.models import SubCategory, Category
 from django.urls import reverse
 from user.models import User
 from django.utils.text import slugify
-    
+
 # Create your models here.
 class Holiday(models.Model):
     name = models.CharField(max_length=100)
@@ -35,15 +35,15 @@ class Product(models.Model):
 
     def get_url(self):
         return reverse('product_detail', args=[self.cate.slug, self.sub_cate.slug, self.slug])
-    
+
 class Attribute(models.Model):
     key = models.CharField(max_length=100, default=None)
     value = models.CharField(max_length=255, default=None)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return f"product: {self.product.product_name}, key: {self.key}"
-    
+
 class ReviewRating(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -56,9 +56,10 @@ class ReviewRating(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to='reviews/', blank=True, null=True)
     video = models.FileField(upload_to='reviews/', blank=True, null=True)
-    
+
     likes = models.ManyToManyField(User, related_name='review_likes', blank=True)
     dislikes = models.ManyToManyField(User, related_name='review_dislikes', blank=True)
+    flagged_as_spam = models.BooleanField(default=False) # Flagged as spam
 
     def like_review(self, user):
         if user not in self.likes.all():
@@ -72,9 +73,9 @@ class ReviewRating(models.Model):
         if user in self.likes.all():
             self.likes.remove(user)
 
-
     def __str__(self):
-        return f"product: {self.product.product_name}, user: {self.user.username}, rating: {self.rating}"
+        spam_status = " (SPAM)" if self.flagged_as_spam else ""
+        return f"product: {self.product.product_name}, user: {self.user.username}, rating: {self.rating}{spam_status}"
 
 class Reply(models.Model):
     review = models.ForeignKey(ReviewRating, related_name='replies', on_delete=models.CASCADE)
