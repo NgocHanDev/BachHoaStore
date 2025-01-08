@@ -1,3 +1,4 @@
+from decimal import Decimal
 import hashlib
 import hmac
 import json
@@ -15,6 +16,8 @@ from BachHoaStore import settings
 from payment.models import PaymentForm, Payment_VNPay
 from payment.vnpay import vnpay
 from datetime import datetime
+from cart.models import Cart, CartItem
+from cart.views import _generate_cart_id, cart
 
 
 def index(request):
@@ -28,45 +31,59 @@ def hmacsha512(key, data):
 
 
 def payment(request):
-
     if request.method == 'POST':
-        # Process input data and build url payment
+        # Lấy tổng tiền từ giỏ hàng
+        total = 0
+        try:
+            cart = Cart.objects.get(cart_id=_generate_cart_id(request))
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+            tax_percent = Decimal('0.02')  # Thuế 2%
+            root_price = sum(item.product.price * item.quantity for item in cart_items)
+            tax_total = root_price * tax_percent
+            total = root_price + tax_total
+        except Cart.DoesNotExist:
+            return render(request, "payment/payment.html", {"title": "Thanh toán", "error": "Giỏ hàng của bạn trống."})
+        
+        # Chuyển đổi tổng tiền sang số nguyên (VNĐ, đơn vị nhỏ nhất)
+        vnp_amount = int(total * 100)
+
+        # Xử lý dữ liệu từ form và tạo URL thanh toán
         form = PaymentForm(request.POST)
         if form.is_valid():
             order_type = form.cleaned_data['order_type']
             order_id = form.cleaned_data['order_id']
-            amount = form.cleaned_data['amount']
             order_desc = form.cleaned_data['order_desc']
             bank_code = form.cleaned_data['bank_code']
             language = form.cleaned_data['language']
             ipaddr = get_client_ip(request)
-            # Build URL Payment
+
+            # Tạo URL thanh toán
             vnp = vnpay()
             vnp.requestData['vnp_Version'] = '2.1.0'
             vnp.requestData['vnp_Command'] = 'pay'
             vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
-            vnp.requestData['vnp_Amount'] = amount * 100
+            vnp.requestData['vnp_Amount'] = vnp_amount
             vnp.requestData['vnp_CurrCode'] = 'VND'
             vnp.requestData['vnp_TxnRef'] = order_id
             vnp.requestData['vnp_OrderInfo'] = order_desc
             vnp.requestData['vnp_OrderType'] = order_type
-            # Check language, default: vn
-            if language and language != '':
-                vnp.requestData['vnp_Locale'] = language
-            else:
-                vnp.requestData['vnp_Locale'] = 'vn'
-                # Check bank_code, if bank_code is empty, customer will be selected bank on VNPAY
-            if bank_code and bank_code != "":
+            
+            # Kiểm tra ngôn ngữ, mặc định: 'vn'
+            vnp.requestData['vnp_Locale'] = language if language else 'vn'
+
+            # Kiểm tra mã ngân hàng, nếu không có, khách hàng sẽ chọn ngân hàng trên VNPAY
+            if bank_code:
                 vnp.requestData['vnp_BankCode'] = bank_code
 
-            vnp.requestData['vnp_CreateDate'] = datetime.now().strftime('%Y%m%d%H%M%S')  # 20150410063022
+            vnp.requestData['vnp_CreateDate'] = datetime.now().strftime('%Y%m%d%H%M%S')
             vnp.requestData['vnp_IpAddr'] = ipaddr
             vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
+
             vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
-            print(vnpay_payment_url)
             return redirect(vnpay_payment_url)
         else:
-            print("Form input not validate")
+            return render(request, "payment/payment.html", {"title": "Thanh toán", "error": "Thông tin không hợp lệ."})
+
     else:
         return render(request, "payment/payment.html", {"title": "Thanh toán"})
 
