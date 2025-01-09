@@ -11,7 +11,8 @@
             <!--   SIDEBAR   -->
             <ul class="list-group">
                 <a class="list-group-item" href="#" onclick="showSection('user-info', this)"> Thông tin người dùng </a>
-                <a class="list-group-item" href="#" onclick="showSection('order-history', this)"> Lịch sử đặt hàng </a>
+                <a class="list-group-item" href="#" onclick="showSection('order-history', this)"> Lịch sử đơn hàng </a>
+                <a class="list-group-item" href="#" onclick="showSection('order-transaction', this)"> Lịch sử giao dịch </a>
                 <a class="list-group-item" href="#" onclick="showSection('shipping-orders', this)"> Đang giao </a>
                 <a class="list-group-item" href="#" onclick="showSection('return-orders', this)"> Trả hàng và hoàn tiền </a>
             </ul>
@@ -81,6 +82,19 @@
             <!-- END USER INFORMATION -->
 
             <!-- ORDER HISTORY -->
+            <section id="order-transaction" class="order-transaction" style="display: none;">
+                {% for t in transactions %}
+                <article class="card mb-4">
+                    <header class="card-header">
+                        <strong class="d-inline-block mr-3">Mã thanh toán: {{ t.transaction_id }}</strong> <br/>
+                        <strong class="d-inline-block mr-3">Mã đơn hàng: {{ t.order_id }}</strong><br/>
+                        <span>Mô tả: {{ t.desc }}</span>
+                        </header>
+                </article> <!-- order-group.// -->
+                {% endfor %}
+            </section>
+            <!-- END ORDER HISTORY -->
+              <!-- Transaction HISTORY -->
             <section id="order-history" class="order-history" style="display: none;">
                 {% for order in history_orders %}
                 <article class="card mb-4">

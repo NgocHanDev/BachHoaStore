@@ -34,6 +34,7 @@ def cart(request, total = 0, quantity = 0, cart_items = None):
         'root_price': format_currency(root_price),
         'total': format_currency(total),
         'tax': tax,
+        'cart_id': cart.cart_id,
         'quantity': quantity,
         'cart_items': cart_items
     }

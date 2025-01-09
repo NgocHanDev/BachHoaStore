@@ -5,6 +5,7 @@ from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from .forms import AddressForm
 from .models import Order
+from payment.models import Transaction
 
 # Create your views here.
 def register(request):
@@ -75,6 +76,7 @@ def profile(request):
     
     # Lấy các đơn hàng của người dùng hiện tại
     orders = Order.objects.filter(user=user)
+    transactions = Transaction.objects.filter(phone_number=user.phone_number)
     
     # Dữ liệu giả cho các đơn hàng đang giao và trả hàng và hoàn tiền
     shipping_orders = [
@@ -169,4 +171,5 @@ def profile(request):
         'shipping_orders': shipping_orders,
         'return_orders': return_orders,
         'history_orders': history_orders,
+        'transactions': transactions
     })

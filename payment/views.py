@@ -18,10 +18,11 @@ from payment.vnpay import vnpay
 from datetime import datetime
 from cart.models import Cart, CartItem
 from cart.views import _generate_cart_id, cart
-
+from .models import Transaction
 
 def index(request):
-    return render(request, "payment/index.html", {"title": "Danh sách demo"})
+    cart_id = request.GET.get('cart_id')
+    return render(request, "payment/index.html", {"title": "Danh sách demo", "cart_id": cart_id})
 
 
 def hmacsha512(key, data):
@@ -31,6 +32,8 @@ def hmacsha512(key, data):
 
 
 def payment(request):
+    cart_id = request.GET.get('cart_id')
+ 
     if request.method == 'POST':
         # Lấy tổng tiền từ giỏ hàng
         total = 0
@@ -85,7 +88,7 @@ def payment(request):
             return render(request, "payment/payment.html", {"title": "Thanh toán", "error": "Thông tin không hợp lệ."})
 
     else:
-        return render(request, "payment/payment.html", {"title": "Thanh toán"})
+        return render(request, "payment/payment.html", {"title": "Thanh toán", "cart_id": cart_id})
 
 
 def payment_ipn(request):
@@ -147,6 +150,8 @@ def payment_return(request):
         vnp_CardType = inputData['vnp_CardType']
         if vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY):
             if vnp_ResponseCode == "00":
+                Transaction.objects.create(transaction_id=vnp_TransactionNo, desc=order_desc, order_id=order_id,phone_number=request.user.phone_number)
+                
                 return render(request, "payment/payment_return.html", {"title": "Kết quả thanh toán",
                                                                "result": "Thành công", "order_id": order_id,
                                                                "amount": amount,

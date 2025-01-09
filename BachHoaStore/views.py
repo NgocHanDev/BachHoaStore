@@ -7,7 +7,10 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from decimal import Decimal
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from user.models import User
 def home(request):
     products_list = Product.objects.all().filter(is_available=True)
     
@@ -61,7 +64,8 @@ def home_search(request):
 @login_required(login_url='login')
 def place_order(request):
     try:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_id = _cart_id(request)
+        cart = Cart.objects.get(cart_id=cart_id)
         cart_items = CartItem.objects.filter(cart=cart, is_active=True)
     except Cart.DoesNotExist:
         cart_items = []
@@ -78,15 +82,13 @@ def place_order(request):
         'tax': format_currency(tax),
         'grand_total': format_currency(grand_total),
         'user_address': user_address,
+        'cart_id': cart_id
     }
     return render(request, 'place-order.html', context)
 @login_required(login_url='login')
 def order_complete(request):
     return render(request, 'order_complete.html')
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from user.models import User
+
 
 @csrf_exempt
 def save_user_address(request):
@@ -104,7 +106,7 @@ def save_user_address(request):
 
         # Update user's address
         user = request.user
-        user.default_address = f"{street_address}, {ward}, {district}"
+        user.address = f"{street_address}, {ward}, {district}"
         user.city = 'TPHCM'
         user.save()
 

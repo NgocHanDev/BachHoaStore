@@ -125,6 +125,7 @@
                         type="text"
                         placeholder="Type here"
                         class="form-control"
+                        name="street_address"
                       />
                     </div>
                   </div>
@@ -278,7 +279,7 @@ của mình.
                   />
                 </p>
                 <a
-                  href="{% url 'index' %}"
+                href="{% url 'index' %}?cart_id={{ cart_id }}"
                   class="btn btn-primary btn-block"
                   >Thanh toán</a
                 >
@@ -336,8 +337,8 @@ của mình.
       event.preventDefault(); // Ngừng hành động mặc định của form (reload trang)
 
       // Lấy các giá trị từ form
-      const district = dicstrict.value;
-      const wardValue = ward.value;
+      const district = dicstrict.options[dicstrict.selectedIndex].text;
+      const wardValue = ward.options[ward.selectedIndex].text;
       const streetAddress = document.querySelector('input[name="street_address"]').value;
 
       // Kiểm tra các giá trị hợp lệ

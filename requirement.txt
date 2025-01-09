@@ -8,3 +8,4 @@ requests
 Pillow
 redis
 kombu
+langdetect

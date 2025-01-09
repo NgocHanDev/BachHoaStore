@@ -22,3 +22,11 @@ class Payment_VNPay(models.Model):
     vnp_TransactionNo = models.CharField(max_length=200, null = True, blank=True)
     vnp_ResponseCode = models.CharField(max_length=200, null=True, blank=True)
 
+class Transaction(models.Model):
+    transaction_id = models.CharField(max_length=250, unique=False)  # Mã giao dịc
+    phone_number = models.CharField(max_length=50, blank=True)
+    desc = models.TextField(null=True, blank=True)  # Mô tả giao dịch
+    order_id = models.IntegerField()  # Mã đơn hàng liên kết
+
+    def __str__(self):
+        return f"Transaction {self.transaction_id} - Order {self.order_id}"

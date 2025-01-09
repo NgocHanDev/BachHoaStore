@@ -3,7 +3,7 @@
 {% block content %}
     <h3>{{ title }}</h3>
     <div class="table-responsive">
-        <form action="{% url "payment" %}" id="create_form" method="post">
+        <form action="{% url 'payment' %}" id="create_form" method="post">
             {% csrf_token %}
             <div class="form-group">
                 <label for="order_type">Loại hàng hóa </label>
