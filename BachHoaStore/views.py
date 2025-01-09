@@ -69,14 +69,45 @@ def place_order(request):
     total = sum(item.product.price * item.quantity for item in cart_items)
     tax = total * Decimal(0.02)  # Giả sử thuế là 2%
     grand_total = total + tax
+    user = request.user
+    user_address = user.default_address if user.default_address else None
 
     context = {
         'cart_items': cart_items,
         'total': format_currency(total),
         'tax': format_currency(tax),
         'grand_total': format_currency(grand_total),
+        'user_address': user_address,
     }
     return render(request, 'place-order.html', context)
 @login_required(login_url='login')
 def order_complete(request):
     return render(request, 'order_complete.html')
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from user.models import User
+
+@csrf_exempt
+def save_user_address(request):
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'User not authenticated'}, status=401)
+
+        data = json.loads(request.body)  # Parse JSON data
+        district = data.get('district')
+        ward = data.get('ward')
+        street_address = data.get('street_address')
+
+        if not district or not ward or not street_address:
+            return JsonResponse({'error': 'Incomplete address data'}, status=400)
+
+        # Update user's address
+        user = request.user
+        user.default_address = f"{street_address}, {ward}, {district}"
+        user.city = 'TPHCM'
+        user.save()
+
+        return JsonResponse({'message': 'Address saved successfully!'})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
