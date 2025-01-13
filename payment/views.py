@@ -151,7 +151,10 @@ def payment_return(request):
         if vnp.validate_response(settings.VNPAY_HASH_SECRET_KEY):
             if vnp_ResponseCode == "00":
                 Transaction.objects.create(transaction_id=vnp_TransactionNo, desc=order_desc, order_id=order_id,phone_number=request.user.phone_number)
-                
+                user = request.user
+                reward_points = amount/1000
+                user.reward_points += reward_points
+                user.save()
                 return render(request, "payment/payment_return.html", {"title": "Kết quả thanh toán",
                                                                "result": "Thành công", "order_id": order_id,
                                                                "amount": amount,

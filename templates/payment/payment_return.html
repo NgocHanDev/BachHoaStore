@@ -48,43 +48,12 @@
                     <li>
                       <strong>Thời Gian Thanh Toán:</strong> {{ order_desc }}
                     </li>
-                    <li><strong>Trạng Thái:</strong> PAID</li>
+                    <li><strong>Tổng tiền:</strong> {{amount }}đ</li>
                   </ul>
                 </div>
               </div>
 
-              <div class="invoice-items">
-                <div
-                  class="table-responsive"
-                  style="overflow: hidden; outline: none"
-                  tabindex="0"
-                >
-                  <table class="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th class="per70 text-center">Mô Tả</th>
-                        <th class="per5 text-center">Số Lượng</th>
-                        <th class="per25 text-center">Tổng Giá Tiền</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          Backup - 1024MB Cloud 2.0 Server - elisium.dynamic.com
-                        </td>
-                        <td class="text-center">12</td>
-                        <td class="text-center">$12.00 USD</td>
-                      </tr>
-                    </tbody>
-                    <tfoot>
-                      <tr>
-                        <th colspan="2" class="text-right">Tổng Tiền:</th>
-                        <th class="text-center">$284.4.40 USD</th>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
+              
               <div class="invoice-footer mt25">
                 <p class="text-center">Cảm ơn bạn đã ghé thăm shop chúng tôi!</p>
               </div>
@@ -112,10 +81,6 @@
   </div>
   
   {% endif %}
-  <p>order_id:{{ order_id }}</p>
-    <p>amount:{{ amount }}</p>
-    <p>order_desc:{{ order_desc }}</p>
-    <p>vnp_TransactionNo:{{ vnp_TransactionNo }}</p>
   </div>
 </div>
 {% endblock %}
